@@ -1,15 +1,32 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function LandingPage() {
+    const navigate = useNavigate();
   return (
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
       {/* Navbar */}
-      <h1 style={{  color: "#ff3d00" }} className="text-orange-500 text-[50px] font-bold text-center mt-10">
-        Food Court BVRIT
-      </h1>
+      <div className="w-full flex justify-between items-center px-10 py-5">
+      <div className="w-1/24"></div>
+        <h1
+          style={{ color: "#ff3d00" }}
+          className="text-orange-500 text-[50px] font-bold text-center flex-grow"
+        >
+          Food Court BVRIT
+        </h1>
 
-      <div className="flex space-x-10  text-[20px] p-[60px] ml-[50px] drop-shadow-xl text-center">
-        {["Homepage", "Foods", "Today Offers", "Contact us", "About us"].map(
+        {/* Login Button */}
+        <button
+          onClick={() => navigate("/login")}
+          className="bg-orange-500 text-white px-5 py-2 rounded-lg text-lg hover:bg-orange-600 transition"
+        >
+          Login
+        </button>
+      </div>
+
+      
+      <div className="flex space-x-10  text-[20px] p-[62px] ml-[90px] drop-shadow-xl text-center">
+        {["Home", "Foods", "Today Offers", "Contact us", "About us"].map(
           (item, index) => (
             <div key={index} className="hover:text-orange-600 cursor-pointer mr-[100px]">
               {item}
