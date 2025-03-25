@@ -1,34 +1,32 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, email, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
+        throw new Error(errorData.message || "Signup failed");
       }
 
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      alert("Login successful!");
-      navigate("/"); // Redirect to homepage
+      alert("Signup successful! You can now log in.");
+      navigate("/login");
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Signup Error:", error);
       alert(error.message);
     }
   };
@@ -42,16 +40,23 @@ const Login = () => {
         </h1>
         <button
           className="bg-gray-700 text-white px-4 py-2 rounded-lg absolute right-10"
-          onClick={() => navigate("/signup")} // Navigate to Signup Page
+          onClick={() => navigate("/login")} // Navigate to Login Page
         >
-          Sign Up
+          Login
         </button>
       </div>
 
-      {/* Login Form */}
+      {/* Signup Form */}
       <div className="flex flex-col items-center justify-center flex-grow">
-        <h2 className="text-4xl font-bold text-orange-500 mb-6">Login</h2>
+        <h2 className="text-4xl font-bold text-orange-500 mb-6">Sign Up</h2>
         <form className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+          <input
+            className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white border border-gray-600"
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
           <input
             className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white border border-gray-600"
             type="email"
@@ -68,18 +73,18 @@ const Login = () => {
           />
           <button
             className="w-full bg-orange-500 text-white p-3 rounded-md font-bold hover:bg-orange-600"
-            onClick={handleLogin}
+            onClick={handleSignup}
           >
-            Login
+            Sign Up
           </button>
         </form>
         <p className="mt-4">
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <span
             className="text-orange-500 cursor-pointer"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/login")}
           >
-            Sign up
+            Login
           </span>
         </p>
       </div>
@@ -87,4 +92,5 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
+
