@@ -44,9 +44,9 @@ app.post("/api/signup", async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ username, email, password: hashedPassword });
+  const newUser = await new User.create({ username, email, password: hashedPassword });
 
-  await newUser.save();
+  // await newUser.save();
   res.status(201).json({ message: "User registered successfully!" });
 });
 
