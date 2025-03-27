@@ -18,7 +18,7 @@ function LandingPage() {
         {/* Login Button */}
         <button
           onClick={() => navigate("/login")}
-          className="bg-orange-500 text-white px-5 py-2 rounded-lg text-lg hover:bg-orange-600 transition"
+          className="bg-orange-500 text-white px-5 py-2 rounded-lg text-lg hover:bg-orange-600 transition cursor-pointer"
         >
           Login
         </button>
