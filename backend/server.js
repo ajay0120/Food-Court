@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // Middleware to parse JSON
 
-const SECRET_KEY = "your_secret_key"; // Use environment variable in production
+const SECRET_KEY = process.env.SECRET_KEY || "fallback_secret"; // Use .env key // Use environment variable in production
 
 // Connect to MongoDB
 mongoose.connect("mongodb://127.0.0.1:27017/foodcourt", {
