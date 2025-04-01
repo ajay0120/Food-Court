@@ -26,7 +26,7 @@ function LandingPage() {
       <div className="w-full flex justify-between items-center px-10 py-5">
         <h1
           style={{ color: "#ff3d00" }}
-          className="text-orange-500 text-[50px] font-bold text-center cursor-pointer"
+          className="text-orange-500 text-[50px] font-bold text-center cursor-pointer ml-[500px]"
           onClick={() => navigate("/")}
         >
           Food Court BVRIT
