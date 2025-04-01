@@ -24,13 +24,10 @@ function LandingPage() {
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
       {/* Navbar */}
       <div className="w-full flex justify-between items-center px-10 py-5">
-        <h1
-          style={{ color: "#ff3d00" }}
-          className="text-orange-500 text-[50px] font-bold text-center cursor-pointer ml-[500px]"
-          onClick={() => navigate("/")}
-        >
+      <button className="text-orange-500 text-[50px] font-bold text-center flex-1 cursor-pointer"
+          onClick={() => navigate("/")}>
           Food Court BVRIT
-        </h1>
+        </button>
 
         {/* Login or Profile Section */}
         <div className="absolute right-10">
