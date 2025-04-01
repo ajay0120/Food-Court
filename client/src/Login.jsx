@@ -25,8 +25,10 @@ const Login = () => {
       const data = await response.json();
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", data.username);
+      localStorage.setItem("email", email); // Store email as well
+
       alert("Login successful!");
-      navigate("/"); // Redirect to homepage
+      navigate("/"); // Redirect to Profile Page
     } catch (error) {
       console.error("Login Error:", error);
       alert(error.message);
@@ -52,13 +54,14 @@ const Login = () => {
       {/* Login Form */}
       <div className="flex flex-col items-center justify-center flex-grow">
         <h2 className="text-4xl font-bold text-orange-500 mb-6">Login</h2>
-        <form className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+        <form className="bg-gray-800 p-6 rounded-lg shadow-lg w-96" onSubmit={handleLogin}>
           <input
             className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white border border-gray-600"
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white border border-gray-600"
@@ -66,10 +69,11 @@ const Login = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <button
             className="w-full bg-orange-500 text-white p-3 rounded-md font-bold hover:bg-orange-600"
-            onClick={handleLogin}
+            type="submit"
           >
             Login
           </button>

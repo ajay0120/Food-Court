@@ -13,9 +13,9 @@ function LandingPage() {
     }
   }, []);
 
+  // Logout function
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
+    localStorage.clear(); // Clears all stored data
     setUsername(null);
     navigate("/login");
   };
@@ -24,15 +24,15 @@ function LandingPage() {
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
       {/* Navbar */}
       <div className="w-full flex justify-between items-center px-10 py-5">
-        <div className="w-1/24"></div>
         <h1
           style={{ color: "#ff3d00" }}
-          className="text-orange-500 text-[50px] font-bold text-center flex-grow"
+          className="text-orange-500 text-[50px] font-bold text-center cursor-pointer"
+          onClick={() => navigate("/")}
         >
           Food Court BVRIT
         </h1>
 
-        {/* Conditional Button: Login OR Profile */}
+        {/* Login or Profile Section */}
         <div className="absolute right-10">
           {username ? (
             <div className="flex items-center gap-4">
@@ -61,10 +61,10 @@ function LandingPage() {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex space-x-10 text-[20px] p-[62px] ml-[90px] drop-shadow-xl text-center">
+      <div className="flex flex-wrap justify-center gap-10 text-[20px] p-[40px] drop-shadow-xl text-center">
         {["Home", "Foods", "Today Offers", "Contact us", "About us"].map(
           (item, index) => (
-            <div key={index} className="hover:text-orange-600 cursor-pointer mr-[100px]">
+            <div key={index} className="hover:text-orange-600 cursor-pointer">
               {item}
             </div>
           )
@@ -72,18 +72,22 @@ function LandingPage() {
       </div>
 
       {/* Main Section */}
-      <div className="flex-grow flex flex-col justify-center items-center relative">
-        <h2 style={{ color: "#808080" }} className="text-7xl font-bold drop-shadow-xl opacity-[.67]">
+      <div className="flex-grow flex flex-col justify-center items-center">
+        <h2 className="text-7xl font-bold drop-shadow-xl opacity-70 text-gray-400">
           బిర్యానీ
         </h2>
-        <h1 style={{ color: "#ff3d00" }} className="text-orange-500 text-6xl font-bold drop-shadow-lg -mt-3">
+        <h1 className="text-orange-500 text-6xl font-bold drop-shadow-lg -mt-3">
           Biriyani
         </h1>
-        <p className="text-gray-300 mt-3">Made by Chicken, Rice, and Spices</p>
+        <p className="text-gray-300 mt-3">Made with Chicken, Rice, and Spices</p>
 
         {/* Biriyani Image */}
         <div className="mt-5 p-2 rounded-lg">
-          <img src="/cb.png" className="w-64 rounded-lg drop-shadow-xl" alt="Main Biriyani" />
+          <img
+            src="/cb.png"
+            className="w-64 rounded-lg drop-shadow-xl"
+            alt="Main Biriyani"
+          />
         </div>
       </div>
 
