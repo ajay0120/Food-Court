@@ -25,7 +25,7 @@ const Profile = () => {
           Food Court BVRIT
         </button>
         <button
-          className="bg-gray-700 text-white px-4 py-2 rounded-lg absolute right-10 cursor-pointer"
+          className="bg-gray-700 text-white px-4 py-2 rounded-lg absolute right-10 cursor-pointer bg-red-500 text-lg"
           onClick={handleLogout}
         >
           Logout
