@@ -6,6 +6,7 @@ import Login from "./Login";
 import Signup from "./SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./components/Profile";
+import Menu from "./components/Menu";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login/>} />
         <Route path="/signup" element={<Signup/>} />
+        <Route path="/menu" element={<Menu />} />
         <Route path="/profile"
           element={
             <ProtectedRoute>

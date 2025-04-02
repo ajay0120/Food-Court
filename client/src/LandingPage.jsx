@@ -24,8 +24,10 @@ function LandingPage() {
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
       {/* Navbar */}
       <div className="w-full flex justify-between items-center px-10 py-5">
-      <button className="text-orange-500 text-[50px] font-bold text-center flex-1 cursor-pointer"
-          onClick={() => navigate("/")}>
+        <button
+          className="text-orange-500 text-[50px] font-bold text-center flex-1 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           Food Court BVRIT
         </button>
 
@@ -66,6 +68,12 @@ function LandingPage() {
             </div>
           )
         )}
+        <button
+          onClick={() => navigate("/menu")}
+          className="bg-orange-500 text-white px-5 py-2 rounded-lg text-lg hover:bg-orange-600 transition cursor-pointer"
+        >
+          View Menu
+        </button>
       </div>
 
       {/* Main Section */}
@@ -76,7 +84,9 @@ function LandingPage() {
         <h1 className="text-orange-500 text-6xl font-bold drop-shadow-lg -mt-3">
           Biriyani
         </h1>
-        <p className="text-gray-300 mt-3">Made with Chicken, Rice, and Spices</p>
+        <p className="text-gray-300 mt-3">
+          Made with Chicken, Rice, and Spices
+        </p>
 
         {/* Biriyani Image */}
         <div className="mt-5 p-2 rounded-lg">
