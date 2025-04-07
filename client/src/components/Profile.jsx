@@ -1,49 +1,137 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Avatar from "react-avatar";
+import Navbar from "./Navbar"; // adjust the import path if needed
+import PersonalInfo from "./PersonalInfo";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("profile");
+  const [activeTab, setActiveTab] = useState("Personal");
 
-  // Get user details from localStorage
   const username = localStorage.getItem("username");
   const email = localStorage.getItem("email");
+  const name = localStorage.getItem("name");
 
-  // Logout Function
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("email");
-    navigate("/login"); // Redirect to login page
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+  };
+
+  const renderSubSection = () => {
+    switch (activeTab) {
+      case "Personal":
+        return (
+        //   <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center">
+        //     <Avatar name={username} size="80" round={true} className="mx-auto mb-4" />
+        //     {name && (
+        //       <p className="text-xl mb-2">
+        //         <strong>Name:</strong> {name}
+        //       </p>
+        //     )}
+        //     <p className="text-xl mb-2">
+        //       <strong>Username:</strong> {username}
+        //     </p>
+        //     <p className="text-xl">
+        //       <strong>Email:</strong> {email}
+        //     </p>
+        //   </div>
+            <PersonalInfo/>
+        );
+      case "Address":
+        return (
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center">
+            <p className="text-lg text-gray-300">No address added yet.</p>
+          </div>
+        );
+      case "SubscriptionInfo":
+        return (
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center">
+            <p className="text-lg text-gray-300">No subscriptions found.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="bg-black min-h-screen text-white flex flex-col items-center">
-      {/* Navbar */}
-      <div className="w-full flex justify-between items-center p-5">
-        <button className="text-orange-500 text-[50px] font-bold text-center flex-1 cursor-pointer"
-          onClick={() => navigate("/")}>
-          Food Court BVRIT
-        </button>
+    <div className="bg-black text-white min-h-screen flex">
+      {/* Sidebar */}
+      <div className="w-60 bg-gray-900 p-6 flex flex-col justify-between">
+        <div>
+          <h2 className="text-2xl text-orange-500 font-bold mb-4">Account</h2>
+          <button
+            onClick={() => setActiveSection("profile")}
+            className={`w-full text-left px-4 py-2 rounded-lg mb-2 ${
+              activeSection === "profile" ? "bg-orange-500" : "bg-gray-800"
+            } hover:bg-orange-500`}
+          >
+            Profile
+          </button>
+          <button
+            onClick={() => setActiveSection("orders")}
+            className={`w-full text-left px-4 py-2 rounded-lg ${
+              activeSection === "orders" ? "bg-orange-500" : "bg-gray-800"
+            } hover:bg-orange-500`}
+          >
+            Previous Orders
+          </button>
+        </div>
         <button
-          className="bg-gray-700 text-white px-4 py-2 rounded-lg absolute right-10 cursor-pointer  text-lg"
           onClick={handleLogout}
+          className="w-full text-left px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700"
         >
           Logout
         </button>
       </div>
 
-      {/* Profile Details */}
-      <div className="flex flex-col items-center justify-center flex-grow">
-        <h2 className="text-4xl font-bold text-orange-500 mb-6">Profile</h2>
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
-          <p className="text-white text-xl mb-2"><strong>Username:</strong> {username}</p>
-          <p className="text-white text-xl mb-4"><strong>Email:</strong> {email}</p>
-          <button
-            className="w-full bg-red-500 text-white p-3 rounded-md font-bold hover:bg-red-600 mt-4"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        <Navbar />
+
+        <div className="p-10 flex-1">
+          {activeSection === "profile" && (
+            <>
+              <h2 className="text-4xl font-bold text-orange-500 mb-6">
+                Your Profile
+              </h2>
+
+              {/* Sub-tabs */}
+              <div className="flex justify-center my-5">
+                <ul className="flex space-x-8 bg-white rounded-lg p-2">
+                  {["Personal", "Address", "SubscriptionInfo"].map((tab) => (
+                    <li
+                      key={tab}
+                      className={`cursor-pointer transition-all duration-300 py-2 px-4 rounded-lg ${
+                        activeTab === tab
+                          ? "bg-orange-500 text-white font-semibold"
+                          : "text-orange-500 hover:bg-blue-100 hover:text-orange-700"
+                      }`}
+                      onClick={() => handleTabClick(tab)}
+                    >
+                      {tab}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {renderSubSection()}
+            </>
+          )}
+
+          {activeSection === "orders" && (
+            <div>
+              <h2 className="text-4xl font-bold text-orange-500 mb-6">
+                Previous Orders
+              </h2>
+              <p className="text-gray-300">Your order history will appear here.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

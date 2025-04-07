@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./components/Navbar.jsx";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -33,39 +34,7 @@ function LandingPage() {
   return (
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
       {/* Navbar */}
-      <div className="w-full flex justify-between items-center px-10 py-5">
-        <div className="w-1/24"></div>
-        <h1 className="text-orange-500 text-[50px] font-bold text-center flex-grow">
-          Food Court BVRIT
-        </h1>
-
-        {/* Conditional Button: Login OR Profile */}
-        <div className="absolute right-10">
-          {username ? (
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate("/profile")}
-                className="bg-gray-700 text-white px-5 py-2 rounded-lg text-lg hover:bg-gray-600 transition cursor-pointer"
-              >
-                {username}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-5 py-2 rounded-lg text-lg hover:bg-red-600 transition cursor-pointer"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-orange-500 text-white px-5 py-2 rounded-lg text-lg hover:bg-orange-600 transition cursor-pointer"
-            >
-              Login
-            </button>
-          )}
-        </div>
-      </div>
+      <Navbar/>
 
       {/* Navigation Menu */}
       <div className="flex space-x-10 text-[20px] p-[62px] ml-[90px] drop-shadow-xl text-center">
