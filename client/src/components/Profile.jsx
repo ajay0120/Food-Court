@@ -26,20 +26,6 @@ const Profile = () => {
     switch (activeTab) {
       case "Personal":
         return (
-        //   <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center">
-        //     <Avatar name={username} size="80" round={true} className="mx-auto mb-4" />
-        //     {name && (
-        //       <p className="text-xl mb-2">
-        //         <strong>Name:</strong> {name}
-        //       </p>
-        //     )}
-        //     <p className="text-xl mb-2">
-        //       <strong>Username:</strong> {username}
-        //     </p>
-        //     <p className="text-xl">
-        //       <strong>Email:</strong> {email}
-        //     </p>
-        //   </div>
             <PersonalInfo/>
         );
       case "Address":
