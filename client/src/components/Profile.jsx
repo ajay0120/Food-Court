@@ -48,7 +48,7 @@ const Profile = () => {
   return (
     <div className="bg-black text-white min-h-screen flex">
       {/* Sidebar */}
-      <div className="w-60 bg-gray-900 p-6 flex flex-col justify-between">
+      <div className="w-60 fixed top-0 left-0 h-screen bg-gray-900 p-6 flex flex-col justify-between cursor-pointer">
         <div>
           <h2 className="text-2xl text-orange-500 font-bold mb-4">Account</h2>
           <button
@@ -77,7 +77,7 @@ const Profile = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col ml-60">
         <Navbar />
 
         <div className="p-10 flex-1">
