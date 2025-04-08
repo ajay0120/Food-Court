@@ -19,7 +19,7 @@ function Cart() {
         const res = await axios.get("http://localhost:5000/api/cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const items = res.data.cart.map((item) => ({
+        const items = res.data.map((item) => ({
           ...item.product,
           quantity: item.quantity,
         }));
@@ -51,20 +51,28 @@ function Cart() {
   };
 
   const updateQuantity = async (id, delta) => {
+    const existingItem = cartItems.find((item) => item._id === id);
+    const newQty = existingItem.quantity + delta;
+
+    if (newQty < 1) return;
+
     const updatedItems = cartItems.map((item) =>
-      item._id === id
-        ? { ...item, quantity: Math.max(item.quantity + delta, 0) }
-        : item
-    ).filter(item => item.quantity > 0);
+      item._id === id ? { ...item, quantity: newQty } : item
+    );
+
     setCartItems(updatedItems);
     calculateTotal(updatedItems);
 
     if (token) {
-      await axios.put(
-        "http://localhost:5000/api/cart/update",
-        { productId: id, quantity: updatedItems.find(item => item._id === id)?.quantity || 0 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      try {
+        await axios.put(
+          `http://localhost:5000/api/cart/update/${id}`,
+          { quantity: newQty },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (err) {
+        console.error("Error updating cart:", err.message);
+      }
     } else {
       const localCart = {};
       updatedItems.forEach((item) => {
@@ -96,7 +104,6 @@ function Cart() {
       setCartItems([]);
       setTotal(0);
 
-      // Clear cart in DB or localStorage
       if (token) {
         await axios.delete("http://localhost:5000/api/cart/clear", {
           headers: { Authorization: `Bearer ${token}` },
@@ -111,7 +118,7 @@ function Cart() {
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
-      <Navbar/>
+      <Navbar />
       <h1 className="text-4xl font-bold text-orange-500 text-center mb-10">
         Your Cart
       </h1>
