@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./components/Navbar.jsx";
+import Navbar from "./components/Navbar";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -33,9 +33,7 @@ function LandingPage() {
 
   return (
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
-      {/* Navbar */}
       <Navbar/>
-
       {/* Navigation Menu */}
       <div className="flex space-x-10 text-[20px] p-[62px] ml-[90px] drop-shadow-xl text-center">
         {["Home", "Foods", "Today Offers", "Contact us", "About us"].map(
@@ -88,14 +86,6 @@ function LandingPage() {
             Explore More <span className="ml-2 text-3xl">&rarr;</span>
           </button>
       </div>
-
-      {/* Footer Section */}
-      <footer className="bg-gray-900 text-white w-full py-10 mt-10">
-        <div className="text-center">
-          <p>&copy; 2025 Food Court BVRIT. All rights reserved.</p>
-          <p>Developed by Your Ajay</p>
-        </div>
-      </footer>
     </div>
   );
 }

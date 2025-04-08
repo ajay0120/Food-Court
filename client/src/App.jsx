@@ -9,6 +9,8 @@ import Profile from "./components/Profile";
 import Menu from "./components/Menu";
 import { CartProvider } from "./context/cartContext"; // ⬅️ import CartProvider
 import Cart from "./components/Cart";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -36,6 +38,7 @@ function App() {
             }
           />
         </Routes>
+        <Footer/>
       </Router>
     </CartProvider>
   );
