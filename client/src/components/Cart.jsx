@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from "/NavBar";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -111,7 +111,7 @@ function Cart() {
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
-      <Navbar />
+      <Navbar/>
       <h1 className="text-4xl font-bold text-orange-500 text-center mb-10">
         Your Cart
       </h1>

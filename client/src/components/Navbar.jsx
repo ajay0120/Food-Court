@@ -39,7 +39,7 @@ function Navbar() {
         <div className="absolute right-10 flex items-center gap-4 cursor-pointer">
           {/* Cart Icon */}
           <button
-            onClick={() => navigate("/menu")}
+            onClick={() => navigate("/cart")}
             className="relative bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700"
           >
             🛒
