@@ -1,37 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "./api/axios"; // Axios instance with baseURL
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({ email: "", password: "", general: "" });
+
+  // Auto login if token exists
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token) {
+      navigate(role === "admin" ? "/admin" : "/profile");
+    }
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "", general: "" });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await axios.post("/auth/login", form);
+      const { token, user } = res.data;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
-      }
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", user.username);
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("name",user.name);
+      navigate(user.role === "admin" ? "/admin" : "/profile");
+    } catch (err) {
+      const message = err.response?.data?.message || "Login failed";
 
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("email", email); // Store email as well
-
-      alert("Login successful!");
-      navigate("/"); // Redirect to Profile Page
-    } catch (error) {
-      console.error("Login Error:", error);
-      alert(error.message);
+      setErrors((prev) => ({
+        ...prev,
+        general: message,
+      }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -39,13 +53,15 @@ const Login = () => {
     <div className="bg-black min-h-screen text-white flex flex-col items-center">
       {/* Navbar */}
       <div className="w-full flex justify-between items-center p-5">
-        <button className="text-orange-500 text-[50px] font-bold text-center flex-1 cursor-pointer"
-          onClick={() => navigate("/")}>
+        <button
+          className="text-orange-500 text-[50px] font-bold text-center flex-1 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           Food Court BVRIT
         </button>
         <button
           className="bg-gray-700 text-white px-4 py-2 rounded-lg absolute right-10 cursor-pointer"
-          onClick={() => navigate("/signup")} // Navigate to Signup Page
+          onClick={() => navigate("/signup")}
         >
           Sign Up
         </button>
@@ -56,28 +72,38 @@ const Login = () => {
         <h2 className="text-4xl font-bold text-orange-500 mb-6">Login</h2>
         <form className="bg-gray-800 p-6 rounded-lg shadow-lg w-96" onSubmit={handleLogin}>
           <input
-            className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white border border-gray-600"
+            className="w-full p-3 mb-2 rounded-md bg-gray-700 text-white border border-gray-600"
             type="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={form.email}
+            onChange={handleChange}
             required
           />
+          {errors.email && <p className="text-red-500 text-sm mb-2">{errors.email}</p>}
+
           <input
-            className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white border border-gray-600"
+            className="w-full p-3 mb-2 rounded-md bg-gray-700 text-white border border-gray-600"
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
             required
           />
+          {errors.password && <p className="text-red-500 text-sm mb-2">{errors.password}</p>}
+
+          {errors.general && <p className="text-red-500 text-sm mb-3">{errors.general}</p>}
+
           <button
             className="w-full bg-orange-500 text-white p-3 rounded-md font-bold hover:bg-orange-600"
             type="submit"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
         <p className="mt-4">
           Don't have an account?{" "}
           <span
