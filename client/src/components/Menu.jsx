@@ -21,7 +21,7 @@ function Menu() {
 
   const fetchMenu = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/food");
+      const res = await axios.get("http://localhost:5000/api/menu");
       setMenu(res.data);
     } catch (err) {
       console.log("Error fetching menu:", err.message);
