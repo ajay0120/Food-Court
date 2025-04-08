@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "./Navbar";
 
@@ -9,6 +10,8 @@ function Menu() {
   const [category, setCategory] = useState("All");
   const [cart, setCart] = useState({});
   const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem("role");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMenu();
@@ -94,7 +97,20 @@ function Menu() {
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
       <Navbar/>
+      
       <h1 className="text-4xl font-bold text-orange-500 text-center mb-10">Our Delicious Menu</h1>
+
+      {/* edit button */}
+      {userRole === "admin" && (
+        <div className="flex justify-end ">
+          <button onClick={() => navigate("/adminMenu")}
+            href="/adminMenu"
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition cursor-pointer"
+          >
+            Edit Menu
+          </button>
+        </div>
+      )}
 
       {/* Search & Filter */}
       <div className="flex flex-col md:flex-row justify-center items-center gap-5 mb-8">
