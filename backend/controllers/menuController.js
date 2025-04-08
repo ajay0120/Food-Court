@@ -12,15 +12,46 @@ const getMenu = async (req, res) => {
 
 // ADD new menu item (admin only)
 const addMenuItem = async (req, res) => {
-  try {
-    const newItem = new Food(req.body);
-    const savedItem = await newItem.save();
-    console.log("REQ.USER:", req.user);
-    res.status(201).json(savedItem);
-  } catch (error) {
-    res.status(400).json({ message: "Error adding menu item" });
-  }
-};
+    try {
+      let { name, desc, img, price, category } = req.body;
+  
+      if (!name || !desc || !price?.org) {
+        return res.status(400).json({ message: "Name, description, and price are required" });
+      }
+  
+      // Normalize category values to lowercase
+      category = category.map((cat) => cat.trim().toLowerCase());
+  
+      // Also normalize name (optional, depends on your logic)
+      const normalizedName = name.trim().toLowerCase();
+  
+      // Check for exact duplicate: same name and same categories (same length and same values)
+      const existingItem = await Food.findOne({
+        name: normalizedName,
+        category: { $all: category, $size: category.length }
+      });
+  
+      if (existingItem) {
+        return res.status(400).json({ message: "Duplicate food item with same name and categories already exists" });
+      }
+  
+      // Create and save new food item
+      const newItem = new Food({
+        name: normalizedName,
+        desc,
+        img,
+        price,
+        category
+      });
+  
+      const savedItem = await newItem.save();
+      res.status(201).json(savedItem);
+    } catch (error) {
+      res.status(400).json({ message: "Error adding menu item" });
+    }
+  };
+  
+  
 
 // UPDATE menu item (admin only)
 const updateMenuItem = async (req, res) => {
