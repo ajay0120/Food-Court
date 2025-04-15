@@ -5,27 +5,37 @@ import Navbar from "./Navbar";
 
 const AdminMenu = () => {
   const [menu, setMenu] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [form, setForm] = useState({
     name: "",
     desc: "",
     img: "",
     price: { org: 0, mrp: 0, off: 0 },
+    type:"",
     category: "",
   });
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
+  const itemsPerPage = 10;
   const token = localStorage.getItem("token");
 
-  const fetchMenu = async () => {
+  const fetchMenu = async (page = 1, category = "all") => {
     try {
-      const res = await axios.get("/menu");
-      setMenu(res.data);
-      setFiltered(res.data);
+      const res = await axios.get("/menu", {
+        params: {
+          page,
+          limit: itemsPerPage,
+          category: category === "all" ? undefined : category,
+        },
+      });
+
+      setMenu(res.data.items);
+      setTotalPages(res.data.pagination.totalPages); 
+      // console.log("totalPages=",totalPages);
     } catch (err) {
+      console.log("error fetching menu",err);
       toast.error("Error fetching menu");
     }
   };
@@ -37,15 +47,8 @@ const AdminMenu = () => {
 
   const handleCategoryFilter = (cat) => {
     setSelectedCategory(cat);
-    if (cat === "all") {
-      setFiltered(menu);
-    } else {
-      const filteredItems = menu.filter((item) =>
-        item.category.includes(cat)
-      );
-      setFiltered(filteredItems);
-    }
     setCurrentPage(1);
+    fetchMenu(1, cat);
   };
 
   const handleAdd = async () => {
@@ -59,16 +62,18 @@ const AdminMenu = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Item added!");
-      fetchMenu();
+      fetchMenu(currentPage, selectedCategory);
       setForm({
         name: "",
         desc: "",
         img: "",
         price: { org: 0, mrp: 0, off: 0 },
+        type: "",
         category: "",
       });
       setModalOpen(false);
     } catch (err) {
+      console.log("error adding items",err);
       toast.error("Error adding item");
     }
   };
@@ -80,7 +85,7 @@ const AdminMenu = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Item deleted!");
-        fetchMenu();
+        fetchMenu(currentPage, selectedCategory);
       } catch (err) {
         toast.error("Error deleting item");
       }
@@ -88,18 +93,12 @@ const AdminMenu = () => {
   };
 
   useEffect(() => {
-    fetchMenu();
+    fetchMenu(currentPage, selectedCategory);
   }, []);
-
-  // Pagination logic
-  const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentItems = filtered.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
-        <Navbar/>
+      <Navbar />
       <Toaster />
       <h2 className="text-3xl font-bold text-center text-orange-500 mb-6">Admin Menu Panel</h2>
 
@@ -131,12 +130,12 @@ const AdminMenu = () => {
 
       {/* Menu List */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentItems.map((item) => (
+        {menu.map((item) => (
           <div key={item._id} className="bg-gray-800 rounded-lg p-4 shadow-lg">
             <img
               src={item.img}
               alt={item.name}
-              className="h-40 w-full object-cover rounded-md mb-4"
+              className="w-full h-40 object-cover object-center rounded-md mb-4"
             />
             <h3 className="text-xl font-semibold">{item.name}</h3>
             <p className="text-gray-400 text-sm mb-2">{item.desc}</p>
@@ -144,8 +143,7 @@ const AdminMenu = () => {
               <span className="text-orange-400">₹{item.price.org}</span>{" "}
               <span className="line-through text-sm text-gray-400">
                 ₹{item.price.mrp}
-              </span>
-              {" "}
+              </span>{" "}
               <span className="text-green-400 text-sm">({item.price.off}% off)</span>
             </p>
             <p className="text-sm text-gray-300 mb-2">
@@ -162,20 +160,22 @@ const AdminMenu = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center gap-2 mt-6">
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrentPage(i + 1)}
-            className={`px-3 py-1 rounded-md ${
-              currentPage === i + 1
-                ? "bg-orange-500 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-orange-600"
-            }`}
-          >
-            {i + 1}
-          </button>
-        ))}
+      <div className="flex justify-center mt-10 gap-4">
+        <button
+          onClick={() => setcurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="text-white px-4 py-2">Page {currentPage} of {totalPages}</span>
+        <button
+          onClick={() => setcurrentPage((currentPage) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
 
       {/* Modal */}
@@ -208,10 +208,7 @@ const AdminMenu = () => {
                 type="number"
                 value={form.price.org}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    price: { ...form.price, org: e.target.value },
-                  })
+                  setForm({ ...form, price: { ...form.price, org: e.target.value } })
                 }
               />
               <input
@@ -220,10 +217,7 @@ const AdminMenu = () => {
                 type="number"
                 value={form.price.mrp}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    price: { ...form.price, mrp: e.target.value },
-                  })
+                  setForm({ ...form, price: { ...form.price, mrp: e.target.value } })
                 }
               />
               <input
@@ -232,20 +226,21 @@ const AdminMenu = () => {
                 type="number"
                 value={form.price.off}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    price: { ...form.price, off: e.target.value },
-                  })
+                  setForm({ ...form, price: { ...form.price, off: e.target.value } })
                 }
               />
             </div>
             <input
               className="w-full p-2 rounded bg-gray-700 text-white"
+              placeholder="Type"
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+            />
+            <input
+              className="w-full p-2 rounded bg-gray-700 text-white"
               placeholder="Category (comma separated)"
               value={form.category}
-              onChange={(e) =>
-                setForm({ ...form, category: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
             />
             <div className="flex justify-end gap-2 mt-3">
               <button

@@ -7,10 +7,13 @@ import { fetchCartData, updateCartItem } from "../services/cartService";
 
 function Menu() {
   const [menu, setMenu] = useState([]);
-  const [filteredMenu, setFilteredMenu] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [cart, setCart] = useState({});
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20); // You can change limit as per your design
+  const [totalPages, setTotalPages] = useState(1);
+  const [type,setType] =useState("All");
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
   const navigate = useNavigate();
@@ -19,38 +22,40 @@ function Menu() {
   useEffect(() => {
     fetchMenu();
     fetchCart();
-  }, []);
-
-  // Apply filters on search/category change
-  useEffect(() => {
-    filterMenu();
-  }, [search, category, menu]);
+  }, [page, search, category, type]);
 
   const fetchMenu = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/menu");
-      setMenu(res.data);
+      const queryParams = new URLSearchParams({
+        page,
+        limit,
+        search: search.trim(),
+        type: type === "All"? "" : type,
+        category: category === "All" ? "" : category,
+      });
+      console.log("the type is",type);
+      console.log("the category is",category);
+      const res = await axios.get(`http://localhost:5000/api/menu?${queryParams}`);
+      console.log(res.data.pagination);
+      console.log(res.data.items);
+      setMenu(res.data.items); 
+      setTotalPages(res.data.pagination.totalPages); 
     } catch (err) {
-      console.log("Error fetching menu:", err.message);
+      console.log("Error fetching menu in frontend:", err.message);
     }
   };
 
   const fetchCart = async () => {
-    const cartData = await fetchCartData(token);
-    setCart(cartData);
-  };
-
-  const filterMenu = () => {
-    let result = menu;
-    if (category !== "All") {
-      result = result.filter((item) => item.category.includes(category));
+    if (!token) {
+      console.log("User is not logged in.");
+      return;
     }
-    if (search.trim()) {
-      result = result.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
-      );
+    try {
+      const cartData = await fetchCartData(token);
+      setCart(cartData);
+    } catch (err) {
+      console.log("Error fetching cart data:", err.message);
     }
-    setFilteredMenu(result);
   };
 
   const updateCart = async (productId, newQty) => {
@@ -70,7 +75,22 @@ function Menu() {
     updateCart(id, newQty < 0 ? 0 : newQty);
   };
 
-  const uniqueCategories = ["All", ...new Set(menu.flatMap((item) => item.category))];
+  const categorySet = new Set();
+
+  menu.forEach((item) => {
+    const categories = Array.isArray(item.category)
+      ? item.category
+      : [item.category]; // wrap string in array
+
+    categories.forEach((cat) => {
+      if (typeof cat === "string" && cat.trim()) {
+        categorySet.add(cat.trim());
+      }
+    });
+  });
+
+  const uniqueCategories = ["All", ...Array.from(categorySet)];
+  
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
@@ -101,18 +121,27 @@ function Menu() {
           className="px-4 py-2 rounded bg-gray-800 text-white border border-orange-500 w-full md:w-1/3"
         />
         <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="px-4 py-2 rounded bg-gray-800 text-white border border-orange-500 w-full md:w-1/4"
+        >
+          <option value="">All</option>
+          <option value="veg">Veg</option>
+          <option value="non-veg">Non-Veg</option>
+        </select>
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="px-4 py-2 rounded bg-gray-800 text-white border border-orange-500 w-full md:w-1/4"
         >
-          {uniqueCategories.map((cat) => (
-            <option key={cat}>{cat}</option>
+          {uniqueCategories.map((cat, index) => (
+            <option key={`${cat}-${index}`}>{cat}</option>
           ))}
         </select>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-        {filteredMenu.map((item) => (
+        {menu.map((item) => (
           <div
             key={item._id}
             className="bg-gray-900 p-5 rounded-lg shadow-md flex flex-col items-center hover:scale-105 transition"
@@ -161,6 +190,23 @@ function Menu() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="flex justify-center mt-10 gap-4">
+        <button
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="text-white px-4 py-2">Page {page} of {totalPages}</span>
+        <button
+          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={page === totalPages}
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
