@@ -69,8 +69,8 @@ const AdminProfile = () => {
         );
       case "Past Orders":
         return (
-          <div className="space-y-4">
-            {pastOrders.map(renderOrder)}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center" >
+            <p className="text-lg text-gray-300">No Past Orders yet.</p>
           </div>
         );
         case "Personal":
