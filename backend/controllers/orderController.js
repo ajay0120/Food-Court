@@ -35,8 +35,8 @@ const getUserOrders = async (req, res) => {
     // console.log(req);
     const orders = await Order.find({ user: req.user.id })
       .populate({
-        path: 'items.product', // Populate the _id field within the items array
-        select: 'name price img category' // Only select the fields you need
+        path: 'items.product', 
+        select: 'name price img category' 
       })
       .exec();
 
@@ -70,10 +70,21 @@ const getUserOrders = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
+    console.log("Hi How are you");
     if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Access denied" });
     }
-    const orders = await Order.find().populate("user", "name username").sort({ createdAt: -1 });
+    const orders = await Order.find()
+  .populate({
+    path: 'user',
+    select: 'name username',
+  })
+  .populate({
+    path: 'items.product',
+    select: 'name price img category',
+  })
+  .sort({ createdAt: -1 });
+    console.log(orders);
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: "Error fetching all orders" });

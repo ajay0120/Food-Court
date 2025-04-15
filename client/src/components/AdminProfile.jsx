@@ -3,18 +3,20 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "react-avatar";
 import Navbar from "./Navbar"; // adjust the import path if needed
 import axios from "axios";
+import PersonalInfo from "./PersonalInfo";
+import CurrentOrders from "./CurrentOrders";
 
 const AdminProfile = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("profile");
-  const [activeTab, setActiveTab] = useState("Current Orders");
+  const [activeTab, setActiveTab] = useState("Personal");
   const [currentOrders, setCurrentOrders] = useState([]);
   const [pastOrders, setPastOrders] = useState([]);
 
   const username = localStorage.getItem("username");
   const email = localStorage.getItem("email");
   const name = localStorage.getItem("name");
-
+  const token =localStorage.getItem("token");
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
@@ -26,11 +28,17 @@ const AdminProfile = () => {
 
   const fetchOrders = async () => {
     try {
-      const { data } = await axios.get("/api/orders/all"); // Make sure this endpoint returns all orders
-      const current = data.filter((order) => order.status === "Placed");
-      const past = data.filter((order) => order.status === "Delivered");
-      setCurrentOrders(current);
-      setPastOrders(past);
+        const res = await axios.get("http://localhost:5000/api/orders/all", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+        }); 
+        console.log("data=",res.data);
+        const current=res.data;
+    //   const current = data.filter((order) => order.status === "Placed");
+    //   const past = data.filter((order) => order.status === "Delivered");
+        setCurrentOrders(current);
+    //   setPastOrders(past);
     } catch (error) {
       console.error("Error fetching orders", error);
     }
@@ -39,33 +47,6 @@ const AdminProfile = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
-
-  const renderOrder = (order, index) => (
-    <div key={order._id} className="bg-gray-800 p-4 rounded-md shadow text-white space-y-2">
-      <div className="flex justify-between">
-        <span className="text-lg font-semibold">Order #{index + 1}</span>
-        <span className="text-sm text-gray-400">{new Date(order.createdAt).toLocaleString()}</span>
-      </div>
-      <p className="text-sm text-gray-400">User: {order.user}</p>
-      <div className="space-y-1">
-        {order.items.map((item, idx) => (
-          <div key={idx} className="flex justify-between bg-gray-700 p-2 rounded text-sm">
-            <span>{item.product?.name || item._id}</span>
-            <span>Qty: {item.quantity}</span>
-          </div>
-        ))}
-      </div>
-      <p className="text-right font-semibold">Total: ₹{order.total}</p>
-      {order.status === "Placed" && (
-        <button
-          onClick={() => markAsDelivered(order._id)}
-          className="bg-green-500 px-4 py-1 mt-2 rounded hover:bg-green-600 text-white"
-        >
-          Mark as Delivered
-        </button>
-      )}
-    </div>
-  );
 
   const markAsDelivered = async (orderId) => {
     try {
@@ -81,13 +62,31 @@ const AdminProfile = () => {
       case "Current Orders":
         return (
           <div className="space-y-4">
-            {currentOrders.map(renderOrder)}
+            {currentOrders.map((order,index)=>
+                <CurrentOrders order={order} index={index}/>
+            )}
           </div>
         );
       case "Past Orders":
         return (
           <div className="space-y-4">
             {pastOrders.map(renderOrder)}
+          </div>
+        );
+        case "Personal":
+        return (
+            <PersonalInfo/>
+        );
+      case "Address":
+        return (
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center" >
+            <p className="text-lg text-gray-300">No address added yet.</p>
+          </div>
+        );
+      case "SubscriptionInfo":
+        return (
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md text-center">
+            <p className="text-lg text-gray-300">No subscriptions found.</p>
           </div>
         );
       default:
@@ -102,7 +101,12 @@ const AdminProfile = () => {
         <div>
           <h2 className="text-2xl text-orange-500 font-bold mb-4">Admin Dashboard</h2>
           <button
-            onClick={() => setActiveSection("profile")}
+            onClick={() => 
+                {
+                    setActiveSection("profile");
+                    setActiveTab("Personal");
+                }
+            }
             className={`w-full text-left px-4 py-2 rounded-lg mb-2 ${
               activeSection === "profile" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
@@ -110,7 +114,12 @@ const AdminProfile = () => {
             Profile
           </button>
           <button
-            onClick={() => setActiveSection("orders")}
+            onClick={() => 
+                {
+                    setActiveSection("orders");
+                    setActiveTab("Current Orders");
+                } 
+            }
             className={`w-full text-left px-4 py-2 rounded-lg ${
               activeSection === "orders" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
@@ -138,7 +147,7 @@ const AdminProfile = () => {
               {/* Sub-tabs */}
               <div className="flex justify-center my-5">
                 <ul className="flex space-x-8 bg-white rounded-lg p-2">
-                  {["Current Orders", "Past Orders"].map((tab) => (
+                  {["Personal", "Address", "SubscriptionInfo"].map((tab) => (
                     <li
                       key={tab}
                       className={`cursor-pointer transition-all duration-300 py-2 px-4 rounded-lg ${
@@ -158,7 +167,31 @@ const AdminProfile = () => {
             </>
           )}
 
-          {activeSection === "orders" && <div>{renderSubSection()}</div>}
+          {activeSection === "orders" && (
+            <>
+                <h2 className="text-4xl font-bold text-orange-500 mb-6">Your Orders</h2>
+                {/* Sub-tabs */}
+              <div className="flex justify-center my-5">
+                <ul className="flex space-x-8 bg-white rounded-lg p-2">
+                  {["Current Orders", "Past Orders"].map((tab) => (
+                    <li
+                      key={tab}
+                      className={`cursor-pointer transition-all duration-300 py-2 px-4 rounded-lg ${
+                        activeTab === tab
+                          ? "bg-orange-500 text-white font-semibold"
+                          : "text-orange-500 hover:bg-blue-100 hover:text-orange-700"
+                      }`}
+                      onClick={() => handleTabClick(tab)}
+                    >
+                      {tab}
+                    </li>
+                  ))}
+                  
+                </ul>
+              </div>
+              {renderSubSection()}
+            </>
+          )}
         </div>
       </div>
     </div>

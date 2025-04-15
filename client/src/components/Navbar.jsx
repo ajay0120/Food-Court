@@ -7,7 +7,7 @@ function Navbar() {
     const navigate = useNavigate();
     const [username, setUsername] = useState(null);
     const { cartItems } = useCart();
-
+    const userRole =localStorage.getItem("role");
     useEffect(() => {
         const storedUsername = localStorage.getItem("username");
         if (storedUsername) {
@@ -58,7 +58,16 @@ function Navbar() {
                     {username ? (
                         <>
                             <button
-                                onClick={() => navigate("/profile")}
+                                onClick={() =>
+                                    {
+                                        if(userRole!=="admin") {
+                                            navigate("/profile")
+                                        }
+                                        else{
+                                            navigate("/admin");
+                                        }
+                                    }
+                                }
                                 className="text-white hover:bg-gray-600 transition rounded-full"
                             >
                                 <Avatar
