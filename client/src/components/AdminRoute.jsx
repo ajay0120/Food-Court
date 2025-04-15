@@ -1,21 +1,15 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from 'react'
+import { Navigate } from "react-router-dom";
 
 const AdminRoute = ({ children }) => {
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  useEffect(() => {
-    if (!user || user.role !== "admin") {
-      navigate("/login");
-    }
-  }, [user, navigate]);
-
-  if (!user || user.role !== "admin") {
-    return null; // important to prevent rendering until we redirect
+  const role = localStorage.getItem("role");
+//   console.log(role);
+  if(role==="admin"){
+    return children
   }
-
-  return children;
+    alert("Page not found");
+    return <Navigate to="/login"/>;
+// return children;
 };
 
 export default AdminRoute;
