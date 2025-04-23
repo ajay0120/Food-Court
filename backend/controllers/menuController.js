@@ -9,7 +9,7 @@ const getMenu = async (req, res) => {
     const query = {};
     // console.log("type && type!==All",(type && type!==All));
     if(type && type!=="All"){
-      console.log("I have reached here",type);
+      // console.log("I have reached here",type);
       query.type = type;
     }
     // if(type=="All"){
