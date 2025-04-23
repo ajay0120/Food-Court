@@ -113,6 +113,15 @@ const Login = () => {
             Sign up
           </span>
         </p>
+        <p className="mt-4">
+          Forgot Password?{" "}
+          <span
+            className="text-orange-500 cursor-pointer"
+            onClick={() => navigate("/forgotPass")}
+          >
+            Click Here
+          </span>
+        </p>
       </div>
     </div>
   );

@@ -166,7 +166,15 @@ function Cart() {
               Total: ₹{total.toFixed(2)}
             </h2>
             <button
-              onClick={handlePlaceOrder}
+              onClick={()=>
+                navigate("/payment",{
+                  state:
+                  {
+                    cartItems,
+                    total,
+                  },
+                })
+              }
               className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg text-lg"
             >
               Place Order

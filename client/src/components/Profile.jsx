@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "react-avatar";
 import Navbar from "./Navbar"; // adjust the import path if needed
 import PersonalInfo from "./PersonalInfo";
+import PreviousOrders from "./PreviousOrders";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -110,14 +111,7 @@ const Profile = () => {
             </>
           )}
 
-          {activeSection === "orders" && (
-            <div>
-              <h2 className="text-4xl font-bold text-orange-500 mb-6">
-                Previous Orders
-              </h2>
-              <p className="text-gray-300">Your order history will appear here.</p>
-            </div>
-          )}
+          {activeSection === "orders" && <PreviousOrders />}
         </div>
       </div>
     </div>

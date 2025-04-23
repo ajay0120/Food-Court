@@ -4,11 +4,11 @@ const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true, // Full name (e.g., Potuganti Ajay Kumar)
+      required: true, 
     },
     username: {
       type: String,
-      required: true, // Username for login/display (e.g., ajay_kumar)
+      required: true, 
       unique: true,
     },
     email: {
