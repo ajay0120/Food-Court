@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "react-avatar";
-import Navbar from "./Navbar"; // adjust the import path if needed
+import Navbar from "./Navbar"; 
 import PersonalInfo from "./PersonalInfo";
 import PreviousOrders from "./PreviousOrders";
 

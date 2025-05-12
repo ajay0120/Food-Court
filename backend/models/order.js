@@ -10,7 +10,11 @@ const orderSchema = new mongoose.Schema({
   ],
   total: { type: Number, required: true },
   paymentMethod: { type: String, required: true },
-  status: { type: String, default: "Placed" },
+  status: {
+    type: String,
+    enum: ["Placed", "Delivered", "Cancelled"],
+    default: "Placed",
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
