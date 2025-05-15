@@ -13,7 +13,7 @@ const AdminMenu = () => {
     price: { org: 0, mrp: 0, off: 0 },
     type: "",
     category: "",
-    inStock: "true",
+    inStock: "",
   });
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
@@ -63,7 +63,7 @@ const AdminMenu = () => {
         mrp: Number(form.price.mrp),
         off: Number(form.price.off),
       },
-      inStock: form.inStock.toLowerCase() === "yes" ? true : false,
+      inStock: form.inStock === "Yes" ? true : false,
     };
 
     try {
@@ -88,7 +88,7 @@ const AdminMenu = () => {
         mrp: Number(form.price.mrp),
         off: Number(form.price.off),
       },
-      inStock: form.inStock.toLowerCase() === "yes" ? true : false,
+      inStock: form.inStock === "Yes" ? true : false,
     };
 
     try {
@@ -126,7 +126,7 @@ const AdminMenu = () => {
       price: { org: 0, mrp: 0, off: 0 },
       type: "",
       category: "",
-      inStock: "true",
+      inStock: "",
     });
     setIsEdit(false);
     setEditId(null);
@@ -145,7 +145,7 @@ const AdminMenu = () => {
       },
       type: item.type,
       category: item.category.join(", "),
-      inStock: item.inStock,
+      inStock: item.inStock?"Yes":"No",
     });
     setIsEdit(true);
     setEditId(item._id);
@@ -353,14 +353,17 @@ const AdminMenu = () => {
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             />
 
-            <label className="block mb-1 font-semibold" htmlFor="inStock">Availability (Yes/No):</label>
-            <input
-              id="inStock"
+            <label className="block mb-1">Availability:</label>
+            <select
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Yes or No"
-              value={form.inStock ? "Yes" : "No"}
-              onChange={(e) => setForm({ ...form, inStock: e.target.value })}
-            />
+              value={form.inStock}
+              onChange={(e) =>
+                setForm({ ...form, inStock: e.target.value })
+              }
+            >
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
 
             <div className="flex justify-end gap-2 mt-3">
               <button
