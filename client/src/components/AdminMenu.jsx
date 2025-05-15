@@ -145,7 +145,7 @@ const AdminMenu = () => {
       },
       type: item.type,
       category: item.category.join(", "),
-      inStock: item.inStock?"Yes":"No",
+      inStock: item.inStock ? "Yes" : "No",
     });
     setIsEdit(true);
     setEditId(item._id);
