@@ -12,11 +12,6 @@ const getMenu = async (req, res) => {
       // console.log("I have reached here",type);
       query.type = type;
     }
-    // if(type=="All"){
-    //   console.log("type is all");
-    // }
-    // console.log("type in backend is=",type);
-    // console.log("category in backend is=",category);
     // Filter by category if provided
     if (category && category !== "All") {
       query.category = category;
@@ -33,7 +28,7 @@ const getMenu = async (req, res) => {
     const items = await Food.find(query)
       .skip(skip)
       .limit(Number(limit))
-      .select("name price category img type");
+      .select("name price category img type inStock");
     // console.log(items);
     // Count total items for pagination
     const totalItems = await Food.countDocuments(query);

@@ -13,7 +13,7 @@ function Menu() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20); // You can change limit as per your design
   const [totalPages, setTotalPages] = useState(1);
-  const [type,setType] =useState("All");
+  const [type, setType] = useState("All");
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
   const navigate = useNavigate();
@@ -30,16 +30,16 @@ function Menu() {
         page,
         limit,
         search: search.trim(),
-        type: type === "All"? "" : type,
+        type: type === "All" ? "" : type,
         category: category === "All" ? "" : category,
       });
-      console.log("the type is",type);
-      console.log("the category is",category);
+      // console.log("the type is",type);
+      // console.log("the category is",category);
       const res = await axios.get(`http://localhost:5000/api/menu?${queryParams}`);
-      console.log(res.data.pagination);
+      // console.log(res.data.pagination);
       console.log(res.data.items);
-      setMenu(res.data.items); 
-      setTotalPages(res.data.pagination.totalPages); 
+      setMenu(res.data.items);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
       console.log("Error fetching menu in frontend:", err.message);
     }
@@ -90,7 +90,7 @@ function Menu() {
   });
 
   const uniqueCategories = ["All", ...Array.from(categorySet)];
-  
+
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
@@ -141,55 +141,66 @@ function Menu() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-        {menu.map((item) => (
-          <div
-            key={item._id}
-            className="bg-gray-900 p-5 rounded-lg shadow-md flex flex-col items-center hover:scale-105 transition"
-          >
-            <img
-              src={item.img}
-              alt={item.name}
-              className="w-32 h-32 object-cover rounded mb-3"
-            />
-            <h3 className="text-xl font-bold text-orange-400">{item.name}</h3>
-            <p className="text-gray-400 text-sm text-center mt-1">{item.desc}</p>
-            <p className="text-white mt-2">
-              ₹{item.price.org}{" "}
-              {item.price.mrp > item.price.org && (
-                <span className="line-through text-gray-500 ml-2">
-                  ₹{item.price.mrp}
-                </span>
-              )}
-            </p>
+        {menu.map((item) => {
+          const isOutOfStock = item.inStock === false;
 
-            <div className="mt-4">
-              {cart[item._id] ? (
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleQuantityChange(item._id, -1)}
-                    className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span>{cart[item._id]}</span>
-                  <button
-                    onClick={() => handleQuantityChange(item._id, 1)}
-                    className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => handleAddToCart(item._id)}
-                  className="bg-orange-500 text-white px-4 py-2 mt-3 rounded hover:bg-orange-600 cursor-pointer"
-                >
-                  Add to Cart
-                </button>
-              )}
+          return (
+            <div
+              key={item._id}
+              className={`bg-gray-900 p-5 rounded-lg shadow-md flex flex-col items-center hover:scale-105 transition ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+            >
+              <img
+                src={item.img}
+                alt={item.name}
+                className={`w-32 h-32 object-cover rounded mb-3 `}
+              />
+
+              <h3 className="text-xl font-bold text-orange-400">{item.name}</h3>
+              <p className="text-gray-400 text-sm text-center mt-1">{item.desc}</p>
+              <p className="text-white mt-2">
+                ₹{item.price.org}{" "}
+                {item.price.mrp > item.price.org && (
+                  <span className="line-through text-gray-500 ml-2">
+                    ₹{item.price.mrp}
+                  </span>
+                )}
+              </p>
+
+              <div className="mt-4">
+                {!isOutOfStock ? (
+                  cart[item._id] ? (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleQuantityChange(item._id, -1)}
+                        className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
+                      >
+                        -
+                      </button>
+                      <span>{cart[item._id]}</span>
+                      <button
+                        onClick={() => handleQuantityChange(item._id, 1)}
+                        className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleAddToCart(item._id)}
+                      className="bg-orange-500 text-white px-4 py-2 mt-3 rounded hover:bg-orange-600 cursor-pointer"
+                    >
+                      Add to Cart
+                    </button>
+                  )
+                ) : (
+                  <div className="text-red-500 font-semibold mt-3">Out of Stock</div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+
       </div>
       <div className="flex justify-center mt-10 gap-4">
         <button
