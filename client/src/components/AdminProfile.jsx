@@ -162,7 +162,7 @@ const AdminProfile = () => {
               setActiveSection("profile");
               setActiveTab("Personal");
             }}
-            className={`w-full text-left px-4 py-2 rounded-lg mb-2 ${
+            className={`w-full text-left px-4 py-2 rounded-lg mb-2 cursor-pointer ${
               activeSection === "profile" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
           >
@@ -173,7 +173,7 @@ const AdminProfile = () => {
               setActiveSection("orders");
               setActiveTab("Current Orders");
             }}
-            className={`w-full text-left px-4 py-2 rounded-lg ${
+            className={`w-full text-left px-4 py-2 rounded-lg cursor-pointer ${
               activeSection === "orders" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
           >
@@ -182,7 +182,7 @@ const AdminProfile = () => {
         </div>
         <button
           onClick={handleLogout}
-          className="w-full text-left px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700"
+          className="w-full text-left px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 cursor-pointer"
         >
           Logout
         </button>

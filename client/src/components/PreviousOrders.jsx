@@ -79,7 +79,7 @@ const PreviousOrders = () => {
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-lg font-semibold ${
+            className={`px-4 py-2 rounded-lg font-semibold cursor-pointer${
               filter === status
                 ? "bg-orange-500 text-white"
                 : "bg-gray-700 text-orange-300 hover:bg-orange-600 hover:text-white"
@@ -146,7 +146,7 @@ const PreviousOrders = () => {
               {order.status === "Placed" && (
                 <button
                   onClick={() => handleCancel(order._id)}
-                  className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg cursor-pointer"
                 >
                   Cancel Order
                 </button>

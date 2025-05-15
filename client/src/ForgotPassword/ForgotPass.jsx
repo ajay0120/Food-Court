@@ -63,7 +63,7 @@ function ForgotPass() {
         {!otpSent ? (
           <button
             onClick={sendOtp}
-            className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600"
+            className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600 cursor-pointer"
           >
             Send OTP
           </button>
@@ -78,7 +78,7 @@ function ForgotPass() {
             />
             <button
               onClick={verifyOtp}
-              className="bg-green-500 px-4 py-2 rounded hover:bg-green-600"
+              className="bg-green-500 px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
             >
               Verify OTP
             </button>

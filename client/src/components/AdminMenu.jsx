@@ -164,7 +164,7 @@ const AdminMenu = () => {
         <button
           onClick={() => setcurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           Previous
         </button>
@@ -172,7 +172,7 @@ const AdminMenu = () => {
         <button
           onClick={() => setcurrentPage((currentPage) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           Next
         </button>
@@ -245,13 +245,13 @@ const AdminMenu = () => {
             <div className="flex justify-end gap-2 mt-3">
               <button
                 onClick={() => setModalOpen(false)}
-                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md"
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAdd}
-                className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-md"
+                className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-md cursor-pointer"
               >
                 Save
               </button>

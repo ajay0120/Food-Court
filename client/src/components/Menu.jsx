@@ -105,7 +105,7 @@ function Menu() {
         <div className="flex justify-end mb-4">
           <button
             onClick={() => navigate("/adminMenu")}
-            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition"
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition cursor-pointer"
           >
             Edit Menu
           </button>
@@ -167,14 +167,14 @@ function Menu() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleQuantityChange(item._id, -1)}
-                    className="bg-orange-500 text-white px-2 py-1 rounded"
+                    className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
                   >
                     -
                   </button>
                   <span>{cart[item._id]}</span>
                   <button
                     onClick={() => handleQuantityChange(item._id, 1)}
-                    className="bg-orange-500 text-white px-2 py-1 rounded"
+                    className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
                   >
                     +
                   </button>
@@ -182,7 +182,7 @@ function Menu() {
               ) : (
                 <button
                   onClick={() => handleAddToCart(item._id)}
-                  className="bg-orange-500 text-white px-4 py-2 mt-3 rounded hover:bg-orange-600"
+                  className="bg-orange-500 text-white px-4 py-2 mt-3 rounded hover:bg-orange-600 cursor-pointer"
                 >
                   Add to Cart
                 </button>
@@ -195,15 +195,15 @@ function Menu() {
         <button
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
           disabled={page === 1}
-          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           Previous
         </button>
-        <span className="text-white px-4 py-2">Page {page} of {totalPages}</span>
+        <span className="text-white px-4 py-2 ">Page {page} of {totalPages}</span>
         <button
           onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={page === totalPages}
-          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           Next
         </button>
