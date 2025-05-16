@@ -11,6 +11,7 @@ function Cart() {
 
   useEffect(() => {
     fetchCartItems();
+    updateQuantity();
   }, []);
 
   const fetchCartItems = async () => {
@@ -52,34 +53,57 @@ function Cart() {
 
   const updateQuantity = async (id, delta) => {
     const existingItem = cartItems.find((item) => item._id === id);
+    if (!existingItem) return;
     const newQty = existingItem.quantity + delta;
 
-    if (newQty < 1) return;
+    if (newQty < 1){
+      if(token){
+        try {
+          setCartItems(prevItems => {
+            const existingItem = prevItems.find(item => item._id === id);
+            if (!existingItem) return prevItems;
+    
+            const newQty = existingItem.quantity + delta;
+            return prevItems.filter(item => item._id !== id); 
+          });
+          console.log(token);
+          await axios.delete(
+            `http://localhost:5000/api/cart/remove/${id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
 
-    const updatedItems = cartItems.map((item) =>
-      item._id === id ? { ...item, quantity: newQty } : item
-    );
-
-    setCartItems(updatedItems);
-    calculateTotal(updatedItems);
-
-    if (token) {
-      try {
-        await axios.put(
-          `http://localhost:5000/api/cart/update/${id}`,
-          { quantity: newQty },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } catch (err) {
-        console.error("Error updating cart:", err.message);
+        } catch (err) {
+          console.error("Error updating cart:", err.message);
+        }
       }
-    } else {
-      const localCart = {};
-      updatedItems.forEach((item) => {
-        localCart[item._id] = item.quantity;
-      });
-      localStorage.setItem("cart", JSON.stringify(localCart));
     }
+    else{
+      const updatedItems = cartItems.map((item) =>
+        item._id === id ? { ...item, quantity: newQty } : item
+      );
+  
+      setCartItems(updatedItems);
+      calculateTotal(updatedItems);
+  
+      if (token) {
+        try {
+          await axios.put(
+            `http://localhost:5000/api/cart/update/${id}`,
+            { quantity: newQty },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (err) {
+          console.error("Error updating cart:", err.message);
+        }
+      } else {
+        const localCart = {};
+        updatedItems.forEach((item) => {
+          localCart[item._id] = item.quantity;
+        });
+        localStorage.setItem("cart", JSON.stringify(localCart));
+      }
+    }
+    
   };
 
   const handlePlaceOrder = async () => {
