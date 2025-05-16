@@ -23,16 +23,16 @@ const FoodSchema = new mongoose.Schema(
     },
     price: {
       type: {
-        org: { 
+        org: { type: Number,default: 0.0 },
+        mrp: { 
           type: Number, 
           validate:{
             validator: function(v){
-              return v<=this.price.mrp;
+              return v>=this.org;
             },
             message: "Org price cannot be more than mrp",
           },
           default: 0.0 },
-        mrp: { type: Number, default: 0.0 },
         off: { type: Number, default: 0 },
       },
       default: { org: 0.0, mrp: 0.0, off: 0 },

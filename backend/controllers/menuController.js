@@ -86,7 +86,7 @@ const addMenuItem = async (req, res) => {
         type,
         category
       });
-  
+      console.log(newItem);
       const savedItem = await newItem.save();
       res.status(201).json(savedItem);
     } catch (error) {
