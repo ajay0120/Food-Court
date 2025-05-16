@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-const CurrentOrders = ({ order, index, markAsDelivered }) => {
+
+
+const PastOrders = ({ order, index }) => {
   return (
     <div
       key={order._id}
@@ -29,20 +31,11 @@ const CurrentOrders = ({ order, index, markAsDelivered }) => {
         ))}
       </div>
 
-      <div className="text-right font-bold text-green-400 text-lg">
+      <div className="text-right font-bold text-orange-400 text-lg">
         Total: ₹{order.total.toFixed(2)}
-      </div>
-
-      <div className="text-right">
-        <button
-          onClick={() => markAsDelivered(order._id)}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow cursor-pointer"
-        >
-          Mark as Delivered
-        </button>
       </div>
     </div>
   );
 };
 
-export default CurrentOrders;
+export default PastOrders;

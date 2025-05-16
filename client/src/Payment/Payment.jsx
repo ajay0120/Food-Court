@@ -112,7 +112,7 @@ function Payment() {
         <h3 className="text-xl mb-3 font-semibold">Select Payment Method</h3>
         <button
           onClick={() => placeOrder("Cash on Delivery")}
-          className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600 mr-4"
+          className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600 mr-4 cursor-pointer"
         >
           Cash on Delivery
         </button>

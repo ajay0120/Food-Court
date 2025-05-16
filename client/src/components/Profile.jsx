@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "react-avatar";
-import Navbar from "./Navbar"; // adjust the import path if needed
+import Navbar from "./Navbar"; 
 import PersonalInfo from "./PersonalInfo";
 import PreviousOrders from "./PreviousOrders";
 
@@ -54,7 +54,7 @@ const Profile = () => {
           <h2 className="text-2xl text-orange-500 font-bold mb-4">Account</h2>
           <button
             onClick={() => setActiveSection("profile")}
-            className={`w-full text-left px-4 py-2 rounded-lg mb-2 ${
+            className={`w-full text-left px-4 py-2 rounded-lg mb-2 cursor-pointer ${
               activeSection === "profile" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
           >
@@ -62,7 +62,7 @@ const Profile = () => {
           </button>
           <button
             onClick={() => setActiveSection("orders")}
-            className={`w-full text-left px-4 py-2 rounded-lg ${
+            className={`w-full text-left px-4 py-2 rounded-lg cursor-pointer${
               activeSection === "orders" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
           >
@@ -71,7 +71,7 @@ const Profile = () => {
         </div>
         <button
           onClick={handleLogout}
-          className="w-full text-left px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700"
+          className="w-full text-left px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 cursor-pointer"
         >
           Logout
         </button>

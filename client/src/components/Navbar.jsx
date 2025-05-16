@@ -45,7 +45,7 @@ function Navbar() {
                 <div className="w-1/3 flex justify-end items-center gap-3">
                     <button
                         onClick={() => navigate("/cart")}
-                        className="relative bg-gray-800 text-white p-2 md:p-3 rounded-full hover:bg-gray-700"
+                        className="relative bg-gray-800 text-white p-2 md:p-3 rounded-full hover:bg-gray-700 cursor-pointer"
                     >
                         🛒
                         {(cartItems?.length || 0) > 0 && (
@@ -68,7 +68,7 @@ function Navbar() {
                                         }
                                     }
                                 }
-                                className="text-white hover:bg-gray-600 transition rounded-full"
+                                className="text-white hover:bg-gray-600 transition rounded-full cursor-pointer"
                             >
                                 <Avatar
                                     color={Avatar.getRandomColor("sitebase", ["blue"])}
@@ -79,7 +79,7 @@ function Navbar() {
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-sm md:text-base hover:bg-red-600 transition"
+                                className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-sm md:text-base hover:bg-red-600 transition cursor-pointer"
                             >
                                 Logout
                             </button>
@@ -87,7 +87,7 @@ function Navbar() {
                     ) : (
                         <button
                             onClick={() => navigate("/login")}
-                            className="bg-orange-500 text-white px-4 py-1.5 rounded-lg text-sm md:text-base hover:bg-orange-600 transition"
+                            className="bg-orange-500 text-white px-4 py-1.5 rounded-lg text-sm md:text-base hover:bg-orange-600 transition cursor-pointer"
                         >
                             Login
                         </button>

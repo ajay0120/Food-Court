@@ -48,6 +48,10 @@ const FoodSchema = new mongoose.Schema(
       default: [],
       index: true,
     },
+    inStock: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

@@ -145,14 +145,14 @@ function Cart() {
                 <div className="flex items-center gap-3 mt-4">
                   <button
                     onClick={() => updateQuantity(item._id, -1)}
-                    className="bg-orange-500 text-white px-2 py-1 rounded"
+                    className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
                   >
                     -
                   </button>
                   <span>{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item._id, 1)}
-                    className="bg-orange-500 text-white px-2 py-1 rounded"
+                    className="bg-orange-500 text-white px-2 py-1 rounded cursor-pointer"
                   >
                     +
                   </button>

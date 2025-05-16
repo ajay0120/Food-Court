@@ -61,7 +61,7 @@ function LandingPage() {
           <button
             key={index}
             onClick={() => handleNavigation(item)}
-            className="bg-gray-900 px-4 py-2 rounded hover:bg-gray-800 hover:text-orange-600 transition"
+            className="bg-gray-900 px-4 py-2 rounded hover:bg-gray-800 hover:text-orange-600 transition cursor-pointer"
           >
             {item}
           </button>
@@ -108,7 +108,7 @@ function LandingPage() {
       <div className="mt-6 md:mt-10 flex justify-center">
         <button
           onClick={() => navigate("/menu")}
-          className="bg-transparent border-2 border-orange-500 text-orange-500 text-base md:text-lg font-semibold px-5 md:px-6 py-2 md:py-3 rounded-lg flex items-center hover:bg-orange-500 hover:text-white transition"
+          className="bg-transparent border-2 border-orange-500 text-orange-500 text-base md:text-lg font-semibold px-5 md:px-6 py-2 md:py-3 rounded-lg flex items-center hover:bg-orange-500 hover:text-white transition cursor-pointer"
         >
           Explore More <span className="ml-2 text-xl md:text-3xl">&rarr;</span>
         </button>

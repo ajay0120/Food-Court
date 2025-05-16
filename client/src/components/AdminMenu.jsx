@@ -11,12 +11,16 @@ const AdminMenu = () => {
     desc: "",
     img: "",
     price: { org: 0, mrp: 0, off: 0 },
-    type:"",
+    type: "",
     category: "",
+    inStock: "",
   });
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [isEdit, setIsEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const itemsPerPage = 10;
   const token = localStorage.getItem("token");
@@ -30,12 +34,11 @@ const AdminMenu = () => {
           category: category === "all" ? undefined : category,
         },
       });
-
+      console.log(res.data.items);
       setMenu(res.data.items);
-      setTotalPages(res.data.pagination.totalPages); 
-      // console.log("totalPages=",totalPages);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
-      console.log("error fetching menu",err);
+      console.log("error fetching menu", err);
       toast.error("Error fetching menu");
     }
   };
@@ -55,6 +58,12 @@ const AdminMenu = () => {
     const payload = {
       ...form,
       category: form.category.split(",").map((c) => c.trim().toLowerCase()),
+      price: {
+        org: Number(form.price.org),
+        mrp: Number(form.price.mrp),
+        off: Number(form.price.off),
+      },
+      inStock: form.inStock === "Yes" ? true : false,
     };
 
     try {
@@ -63,18 +72,35 @@ const AdminMenu = () => {
       });
       toast.success("Item added!");
       fetchMenu(currentPage, selectedCategory);
-      setForm({
-        name: "",
-        desc: "",
-        img: "",
-        price: { org: 0, mrp: 0, off: 0 },
-        type: "",
-        category: "",
-      });
-      setModalOpen(false);
+      resetForm();
     } catch (err) {
-      console.log("error adding items",err);
+      console.log("error adding items", err);
       toast.error("Error adding item");
+    }
+  };
+
+  const handleUpdate = async () => {
+    const payload = {
+      ...form,
+      category: form.category.split(",").map((c) => c.trim().toLowerCase()),
+      price: {
+        org: Number(form.price.org),
+        mrp: Number(form.price.mrp),
+        off: Number(form.price.off),
+      },
+      inStock: form.inStock === "Yes" ? true : false,
+    };
+
+    try {
+      await axios.put(`/menu/${editId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Item updated!");
+      fetchMenu(currentPage, selectedCategory);
+      resetForm();
+    } catch (err) {
+      console.log("error updating item", err);
+      toast.error("Error updating item");
     }
   };
 
@@ -92,9 +118,48 @@ const AdminMenu = () => {
     }
   };
 
+  const resetForm = () => {
+    setForm({
+      name: "",
+      desc: "",
+      img: "",
+      price: { org: 0, mrp: 0, off: 0 },
+      type: "",
+      category: "",
+      inStock: "",
+    });
+    setIsEdit(false);
+    setEditId(null);
+    setModalOpen(false);
+  };
+
+  const openEditModal = (item) => {
+    setForm({
+      name: item.name,
+      desc: item.desc,
+      img: item.img,
+      price: {
+        org: item.price.org,
+        mrp: item.price.mrp,
+        off: item.price.off
+      },
+      type: item.type,
+      category: item.category.join(", "),
+      inStock: item.inStock ? "Yes" : "No",
+    });
+    setIsEdit(true);
+    setEditId(item._id);
+    setModalOpen(true);
+  };
+
   useEffect(() => {
     fetchMenu(currentPage, selectedCategory);
   }, []);
+
+  // Update currentPage setter to fetch new page when changed
+  useEffect(() => {
+    fetchMenu(currentPage, selectedCategory);
+  }, [currentPage, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -121,7 +186,10 @@ const AdminMenu = () => {
       {/* Add Button */}
       <div className="flex justify-center mb-4">
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            resetForm();
+            setModalOpen(true);
+          }}
           className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md cursor-pointer"
         >
           + Add Item
@@ -131,11 +199,11 @@ const AdminMenu = () => {
       {/* Menu List */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {menu.map((item) => (
-          <div key={item._id} className="bg-gray-800 rounded-lg p-4 shadow-lg">
+          <div key={item._id} className="bg-gray-900 p-5 rounded-lg shadow-md flex flex-col items-center hover:scale-105 transition">
             <img
               src={item.img}
               alt={item.name}
-              className="w-full h-40 object-cover object-center rounded-md mb-4"
+              className="w-32 h-32 object-cover object-center rounded-md mb-3"
             />
             <h3 className="text-xl font-semibold">{item.name}</h3>
             <p className="text-gray-400 text-sm mb-2">{item.desc}</p>
@@ -149,12 +217,23 @@ const AdminMenu = () => {
             <p className="text-sm text-gray-300 mb-2">
               Categories: {item.category.join(", ")}
             </p>
-            <button
-              onClick={() => handleDelete(item._id)}
-              className="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md cursor-pointer"
-            >
-              Delete
-            </button>
+            <p className="text-sm text-gray-300 mb-2">
+              Availability: {item.inStock ? "Yes" : "No"}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => openEditModal(item)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md cursor-pointer"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(item._id)}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -162,103 +241,148 @@ const AdminMenu = () => {
       {/* Pagination */}
       <div className="flex justify-center mt-10 gap-4">
         <button
-          onClick={() => setcurrentPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           Previous
         </button>
         <span className="text-white px-4 py-2">Page {currentPage} of {totalPages}</span>
         <button
-          onClick={() => setcurrentPage((currentPage) => Math.min(prev + 1, totalPages))}
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-orange-500 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer"
         >
           Next
         </button>
       </div>
 
       {/* Modal */}
+      {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-gray-800 text-white p-6 rounded-lg w-full max-w-md space-y-3">
-            <h3 className="text-xl font-bold text-orange-500 mb-2">Add New Item</h3>
+            <h3 className="text-xl font-bold text-orange-500 mb-2">
+              {isEdit ? "Edit Item" : "Add New Item"}
+            </h3>
+
+            <label className="block mb-1 font-semibold" htmlFor="name">Name:</label>
             <input
+              id="name"
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Name"
+              placeholder="Enter item name"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
+
+            <label className="block mb-1 font-semibold" htmlFor="desc">Description:</label>
             <input
+              id="desc"
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Description"
+              placeholder="Enter description"
               value={form.desc}
               onChange={(e) => setForm({ ...form, desc: e.target.value })}
             />
+
+            <label className="block mb-1 font-semibold" htmlFor="img">Image URL:</label>
             <input
+              id="img"
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Image URL"
+              placeholder="Enter image URL"
               value={form.img}
               onChange={(e) => setForm({ ...form, img: e.target.value })}
             />
+
+            <label className="block mb-1 font-semibold">Prices:</label>
             <div className="flex gap-2">
-              <input
-                className="w-1/3 p-2 rounded bg-gray-700 text-white"
-                placeholder="Org Price"
-                type="number"
-                value={form.price.org}
-                onChange={(e) =>
-                  setForm({ ...form, price: { ...form.price, org: e.target.value } })
-                }
-              />
-              <input
-                className="w-1/3 p-2 rounded bg-gray-700 text-white"
-                placeholder="MRP"
-                type="number"
-                value={form.price.mrp}
-                onChange={(e) =>
-                  setForm({ ...form, price: { ...form.price, mrp: e.target.value } })
-                }
-              />
-              <input
-                className="w-1/3 p-2 rounded bg-gray-700 text-white"
-                placeholder="Off %"
-                type="number"
-                value={form.price.off}
-                onChange={(e) =>
-                  setForm({ ...form, price: { ...form.price, off: e.target.value } })
-                }
-              />
+              <div className="flex flex-col w-1/3">
+                <label className="text-sm mb-1" htmlFor="orgPrice">Org Price:</label>
+                <input
+                  id="orgPrice"
+                  className="p-2 rounded bg-gray-700 text-white"
+                  type="number"
+                  value={form.price.org}
+                  onChange={(e) =>
+                    setForm({ ...form, price: { ...form.price, org: e.target.value } })
+                  }
+                />
+              </div>
+
+              <div className="flex flex-col w-1/3">
+                <label className="text-sm mb-1" htmlFor="mrpPrice">MRP:</label>
+                <input
+                  id="mrpPrice"
+                  className="p-2 rounded bg-gray-700 text-white"
+                  type="number"
+                  value={form.price.mrp}
+                  onChange={(e) =>
+                    setForm({ ...form, price: { ...form.price, mrp: e.target.value } })
+                  }
+                />
+              </div>
+
+              <div className="flex flex-col w-1/3">
+                <label className="text-sm mb-1" htmlFor="offPrice">Off %:</label>
+                <input
+                  id="offPrice"
+                  className="p-2 rounded bg-gray-700 text-white"
+                  type="number"
+                  value={form.price.off}
+                  onChange={(e) =>
+                    setForm({ ...form, price: { ...form.price, off: e.target.value } })
+                  }
+                />
+              </div>
             </div>
+
+            <label className="block mb-1 font-semibold" htmlFor="type">Type:</label>
             <input
+              id="type"
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Type"
+              placeholder="Enter type"
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
             />
+
+            <label className="block mb-1 font-semibold" htmlFor="category">Category (comma separated):</label>
             <input
+              id="category"
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Category (comma separated)"
+              placeholder="Enter categories"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             />
+
+            <label className="block mb-1">Availability:</label>
+            <select
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              value={form.inStock}
+              onChange={(e) =>
+                setForm({ ...form, inStock: e.target.value })
+              }
+            >
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
             <div className="flex justify-end gap-2 mt-3">
               <button
-                onClick={() => setModalOpen(false)}
-                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md"
+                onClick={resetForm}
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-md cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={handleAdd}
-                className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-md"
+                onClick={isEdit ? handleUpdate : handleAdd}
+                className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-md cursor-pointer"
               >
-                Save
+                {isEdit ? "Update" : "Save"}
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
