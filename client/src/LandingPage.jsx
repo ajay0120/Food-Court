@@ -22,7 +22,7 @@ function LandingPage() {
 
   const menuItems = [
     { name: "Biriyani", img: "/cb.png" },
-    {name:"ajay", img: "/noImage.png" },
+    {name :"Chicken", img: "/chicken.png"},
     { name: "Burger", img: "/burger.png" },
     { name: "Pizza", img: "/pizza.png" },
     { name: "Waffles", img: "/waffels.png" },
