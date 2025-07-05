@@ -77,3 +77,67 @@
 2025-07-05 18:40:31 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
 2025-07-05 18:40:31 [INFO]: Fetched 3 cancelled orders
 2025-07-05 18:40:31 [INFO]: Fetched 8 past orders
+2025-07-05 18:42:37 [INFO]: authController loaded
+2025-07-05 18:42:37 [INFO]: menuController loaded
+2025-07-05 18:42:37 [INFO]: cartController loaded
+2025-07-05 18:42:37 [INFO]: orderController loaded
+2025-07-05 18:42:42 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:42:42 [INFO]: Fetched 0 current orders
+2025-07-05 18:42:42 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:42:42 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:42:42 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:42:42 [INFO]: Fetched 0 current orders
+2025-07-05 18:42:42 [INFO]: Fetched 5 past orders
+2025-07-05 18:42:42 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:42:42 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:42:42 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:42:42 [INFO]: Fetched 5 past orders
+2025-07-05 18:42:42 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:03 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:03 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:03 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:03 [INFO]: Fetched 0 current orders
+2025-07-05 18:43:03 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:03 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:03 [INFO]: Fetched 5 past orders
+2025-07-05 18:43:03 [INFO]: Fetched 0 current orders
+2025-07-05 18:43:03 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:03 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:03 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:03 [INFO]: Fetched 5 past orders
+2025-07-05 18:43:16 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:16 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:16 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:16 [INFO]: Fetched 0 current orders
+2025-07-05 18:43:16 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:16 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:16 [INFO]: Fetched 5 past orders
+2025-07-05 18:43:16 [INFO]: Fetched 0 current orders
+2025-07-05 18:43:16 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:16 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:16 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:16 [INFO]: Fetched 5 past orders
+2025-07-05 18:43:41 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:41 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:41 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:41 [INFO]: Fetched 0 current orders
+2025-07-05 18:43:41 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:41 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:41 [INFO]: Fetched 5 past orders
+2025-07-05 18:43:41 [INFO]: Fetched 0 current orders
+2025-07-05 18:43:41 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:41 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:43:41 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:43:41 [INFO]: Fetched 5 past orders
+2025-07-05 18:44:16 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:44:16 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:44:16 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:44:16 [INFO]: Fetched 0 current orders
+2025-07-05 18:44:16 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:44:16 [INFO]: Fetched 5 past orders
+2025-07-05 18:44:16 [INFO]: Fetched 2 cancelled orders
+2025-07-05 18:44:16 [INFO]: Fetched 0 current orders
+2025-07-05 18:44:16 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:44:16 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:44:16 [INFO]: Fetched 5 past orders
+2025-07-05 18:44:16 [INFO]: Fetched 2 cancelled orders
