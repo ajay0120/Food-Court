@@ -15,6 +15,7 @@ import ForgotPass from "./ForgotPassword/ForgotPass";
 import Payment from "./Payment/Payment";
 import AdminRoute from "./components/AdminRoute";
 import AdminProfile from "./components/AdminProfile";
+import VerifyEmail from "./components/VerifyEmail";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
           <Route path="/adminMenu" element={<AdminMenu/>}/> */}
           <Route path="/forgotPass" element={<ForgotPass/>}/>
           <Route path="/payment" element={<Payment/>}></Route>
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
         <Footer/>
       </Router>

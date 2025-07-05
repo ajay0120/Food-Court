@@ -34,6 +34,7 @@ const AdminProfile = () => {
       const res = await axios.get("http://localhost:5000/api/orders/pastOrders", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res);
       setPastOrders(res.data);
     } catch (error) {
       console.error("Error fetching past orders", error);
@@ -45,6 +46,7 @@ const AdminProfile = () => {
       const res = await axios.get("http://localhost:5000/api/orders/cancelledOrders", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("Cancelled Orders", res);
       setCancelledOrders(res.data);
     } catch (error) {
       console.error("Error fetching cancelled orders", error);

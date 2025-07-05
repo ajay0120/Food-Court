@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const OTP = require("../models/otp");
 const sendMail = require("../utils/sendMail");
 const logger = require('../logger.js');
+const resendOtp = require("../utils/reSendOpt.js");
 
 logger.info("authController loaded");
 
@@ -16,43 +17,58 @@ const signup = async (req, res) => {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-        logger.warn(`Signup attempt with existing email: ${email}`);
-        return res.status(400).json({ message: "Email already exists" });
-    }
+    try {
+        const existingUser = await User.findOne({ email });
 
-    const usernameExists = await User.findOne({ username });
-    if (usernameExists){
-        logger.warn(`Signup attempt with existing username: ${username}`);
-        if (usernameExists.email === email) {
-            return res.status(400).json({ message: "Email already exists" });
+        // 🚫 Case 1: User already verified
+        if (existingUser && existingUser.verified) {
+            logger.warn(`Signup attempt for already verified email: ${email}`);
+            return res.status(400).json({ message: "User already exists. Please login." });
         }
-        return res.status(400).json({ message: "Username already taken" });
+
+        // 🔁 Case 2: User exists but not verified → resend OTP and continue
+        if (existingUser && !existingUser.verified) {
+            logger.info(`User exists but not verified. Resending OTP to ${email}`);
+            await resendOtp(email); // Create a helper function for this
+            logger.info(`OTP resent to ${email}`);
+            return res.status(200).json({ message: "User already exists but not verified. OTP resent." });
+        }
+
+        // ✅ Case 3: New user → Create user
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            name,
+            username,
+            email,
+            password: hashedPassword,
+            role: role || "student",
+            verified: false,
+            otpTries: 0,
+        });
+
+        logger.info(`New user created: ${email}`);
+
+        await resendOtp(email); // Same function as above
+        logger.info(`OTP sent to ${email} for verification`);
+        res.status(201).json({ message: "Signup successful. OTP sent to email." });
+
+    } catch (err) {
+        logger.error(`Signup failed for ${email}: ${err.message}`);
+        res.status(500).json({ message: "Signup failed. Try again later." });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-        name,
-        username,
-        email,
-        password: hashedPassword,
-        role: role || "student",
-    });
-    logger.info(`New user registered: ${newUser.email}`);
-    res.status(201).json({ message: "User registered successfully!" });
 };
+
 
 const login = async (req, res) => {
     logger.info("Login endpoint called");
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
-        if (!user){
-          logger.warn(`Login attempt with non-existing email: ${email}`);
-          return res.status(400).json({ message: "Invalid credentials" });
-        } 
+        if (!user) {
+            logger.warn(`Login attempt with non-existing email: ${email}`);
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
@@ -108,43 +124,55 @@ const sendOtp = async (req, res) => {
 const verifyOtp = async (req, res) => {
     logger.info("Verify OTP endpoint called");
     const { email, otp } = req.body;
-    const existingOtp = await OTP.findOne({ email });
 
-    if (!existingOtp || existingOtp.otp !== otp) {
-        logger.warn(`Invalid or expired OTP attempt for email: ${email}`);
-        return res.status(400).json({ message: "Invalid or expired OTP" });
+    try {
+        const existingOtp = await OTP.findOne({ email });
+
+        if (!existingOtp || existingOtp.otp !== otp || existingOtp.expiresAt < new Date()) {
+            logger.warn(`Invalid or expired OTP attempt for email: ${email}`);
+            return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            logger.warn(`OTP verified but user not found for email: ${email}`);
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // ✅ Mark user as verified
+        user.verified = true;
+        await user.save();
+
+        await OTP.deleteOne({ email }); // Clean up the used OTP
+        logger.info(`OTP deleted after successful verification for email: ${email}`);
+
+        // ✅ Issue JWT
+        const token = jwt.sign(
+            { id: user._id, role: user.role, email: user.email, username: user.username },
+            process.env.SECRET_KEY,
+            { expiresIn: "1d" }
+        );
+
+        logger.info(`OTP verified and JWT issued for email: ${email}`);
+
+        res.json({
+            message: "OTP verified successfully",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                img: user.img,
+            },
+        });
+
+    } catch (error) {
+        logger.error(`Error in verifyOtp for email: ${email} - ${error.message}`);
+        res.status(500).json({ message: "Server error" });
     }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-        logger.warn(`OTP verified but user not found for email: ${email}`);
-        return res.status(404).json({ message: "User not found" });
-    }
-
-    await OTP.deleteOne({ email }); // Clean up the used OTP
-    logger.info(`OTP deleted after successful verification for email: ${email}`);
-
-    // ✅ Sign JWT
-    const token = jwt.sign(
-        { id: user._id, role: user.role, email: user.email, username: user.username },
-        process.env.SECRET_KEY,
-        { expiresIn: "1d" }
-    );
-
-    logger.info(`OTP verified and JWT issued for email: ${email}`);
-
-    res.json({
-        message: "OTP verified successfully",
-        token,
-        user: {
-            id: user._id,
-            name: user.name,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            img: user.img,
-        },
-    });
 };
+
 
 module.exports = { signup, login, sendOtp, verifyOtp };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "./api/axios";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const Signup = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // clear error on typing
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleSignup = async (e) => {
@@ -25,12 +26,17 @@ const Signup = () => {
     setErrors({});
 
     try {
-      await axios.post("/auth/signup", form);
-      alert("Signup successful! You can now log in.");
-      navigate("/login");
+      const res = await axios.post("/auth/signup", form);
+
+      toast.success(res.data.message || "Check your email for OTP");
+
+      // ✅ Move to OTP verification page and pass email
+      navigate("/verify-email", { state: { email: form.email } });
     } catch (err) {
       const msg = err.response?.data?.message || "Signup failed";
-      // simple error mapping (can be made smarter based on backend validation)
+      toast.error(msg);
+
+      // Optional: better field-wise error mapping
       if (msg.toLowerCase().includes("email")) {
         setErrors({ email: msg });
       } else if (msg.toLowerCase().includes("username")) {

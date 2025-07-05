@@ -1,5 +1,5 @@
 const Order = require("../models/order");
-const Food =require("../models/Food");
+const Food = require("../models/Food");
 const logger = require('../logger.js');
 
 logger.info("orderController loaded");
@@ -54,11 +54,11 @@ const getUserOrders = async (req, res) => {
 
     const orders = await Order.find({ user: req.user.id })
       .populate({
-        path: 'items.product', 
-        select: 'name price img category' 
+        path: 'items.product',
+        select: 'name price img category'
       })
       .exec();
-    
+
     // console.log(orders); // Log the populated orders for debugging
     // orders.forEach(order => {
     //   order.items.forEach(item => {
@@ -66,7 +66,7 @@ const getUserOrders = async (req, res) => {
     //     console.log("item",item._id);
     //   });
     // });
-    
+
 
     // for (const order of orders) {
     //   for (const item of order.items) {
@@ -132,34 +132,34 @@ const getAllOrders = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
     const orders = await Order.find()
-  .populate({
-    path: 'user',
-    select: 'name username',
-  })
-  .populate({
-    path: 'items.product',
-    select: 'name price img category',
-  })
-  .sort({ createdAt: -1 });
-  logger.info(`Fetched ${orders.length} orders`);
-  res.json(orders);
+      .populate({
+        path: 'user',
+        select: 'name username',
+      })
+      .populate({
+        path: 'items.product',
+        select: 'name price img category',
+      })
+      .sort({ createdAt: -1 });
+    logger.info(`Fetched ${orders.length} orders`);
+    res.json(orders);
   } catch (err) {
     logger.error("Error fetching all orders: " + err.message);
     res.status(500).json({ message: "Error fetching all orders" });
   }
 };
 
-const getCurrentOrders= async(req,res)=>{
-  try{
+const getCurrentOrders = async (req, res) => {
+  try {
     logger.info(`Fetching current orders for user ${req.user.id}`);
-    if(req.user.role !=="admin"){
+    if (req.user.role !== "admin") {
       logger.warn(`Access denied for user ${req.user.id} to fetch current orders`);
       return res.status(403).json({ message: "Access denied" });
     }
-    const currentOrders = await Order.find({ status:  'Placed'  })
-    .populate({ path: 'user', select: 'name username' })
-    .populate({ path: 'items.product', select: 'name price img category' })
-    .sort({ createdAt: -1 });
+    const currentOrders = await Order.find({ status: 'Placed' })
+      .populate({ path: 'user', select: 'name username' })
+      .populate({ path: 'items.product', select: 'name price img category' })
+      .sort({ createdAt: -1 });
     logger.info(`Fetched ${currentOrders.length} current orders`);
     res.json(currentOrders);
   } catch (err) {
@@ -168,74 +168,74 @@ const getCurrentOrders= async(req,res)=>{
   }
 }
 
-const getPastOrders = async(req,res)=> {
-  try{
+const getPastOrders = async (req, res) => {
+  try {
     logger.info(`Fetching past orders for user ${req.user.id}`);
-    if(req.user.role!="admin"){
+    if (req.user.role != "admin") {
       logger.warn(`Access denied for user ${req.user.id} to fetch past orders`);
-      return res.status(403).json({message: "Access denied"});
+      return res.status(403).json({ message: "Access denied" });
     }
-    const pastOrders= await Order.find({ status: 'Delivered' })
-    .populate({ path: 'user', select: 'name username' })
-    .populate({ path: 'items.product', select: 'name price img category' })
-    .sort({ createdAt: -1 });
+    const pastOrders = await Order.find({ status: 'Delivered' })
+      .populate({ path: 'user', select: 'name username' })
+      .populate({ path: 'items.product', select: 'name price img category' })
+      .sort({ createdAt: -1 });
     logger.info(`Fetched ${pastOrders.length} past orders`);
     // console.log(pastOrders);
     res.json(pastOrders);
-  } catch{
+  } catch {
     logger.error("Error fetching past orders: " + err.message);
-    res.status(500).json({message:"Error fetching all orders"});
+    res.status(500).json({ message: "Error fetching all orders" });
   }
 }
 
-const markAsDelivered = async(req,res)=>{
-  try{
+const markAsDelivered = async (req, res) => {
+  try {
     logger.info(`Marking order as delivered for user ${req.user.id}`);
-    if(req.user.role!="admin"){
+    if (req.user.role != "admin") {
       logger.warn(`Access denied for user ${req.user.id} to mark order as delivered`);
-      return res.status(403).json({message:"Access denied"});
+      return res.status(403).json({ message: "Access denied" });
     }
-    const {orderId}=req.body;
+    const { orderId } = req.body;
     if (!orderId) {
       logger.warn("Mark as delivered attempt without order ID");
       return res.status(400).json({ message: "Order ID is required" });
     }
-    const orderExist=await Order.find({orderId});
-    if(!orderExist) {
+    const orderExist = await Order.find({ orderId });
+    if (!orderExist) {
       logger.warn(`Order with ID ${orderId} does not exist`);
       return res.status(400).json({ message: "Order doesn't exist" });
     }
     await Order.updateOne(
-      {_id:orderId},
-      {$set:{status : "Delivered"}}
+      { _id: orderId },
+      { $set: { status: "Delivered" } }
     );
     logger.info(`Order ${orderId} marked as delivered by user ${req.user.id}`);
     return res.status(200).json({ message: "Order marked as delivered" });
-  } catch{
+  } catch {
     logger.error("Error in marking order as delivered: " + err.message);
-    res.status(500).json({message:"Error in marking"});
+    res.status(500).json({ message: "Error in marking" });
   }
 
 }
 
-const getCancelledOrders = async (req,res) => {
-  try{
+const getCancelledOrders = async (req, res) => {
+  try {
     logger.info(`Fetching cancelled orders for user ${req.user.id}`);
-    if(req.user.role !== "admin"){
+    if (req.user.role !== "admin") {
       logger.warn(`Access denied for user ${req.user.id} to fetch cancelled orders`);
-      return res.status(403).json({message: "Access denied"});
+      return res.status(403).json({ message: "Access denied" });
     }
-    const cancelledOrders= await Order.find({ status: 'Cancelled' })
-    .populate({ path: 'user', select: 'name username' })
-    .populate({ path: 'items.product', select: 'name price img category' })
-    .sort({ createdAt: -1 });
+    const cancelledOrders = await Order.find({ status: 'Cancelled' })
+      .populate({ path: 'user', select: 'name username' })
+      .populate({ path: 'items.product', select: 'name price img category' })
+      .sort({ createdAt: -1 });
     logger.info(`Fetched ${cancelledOrders.length} cancelled orders`);
     res.json(cancelledOrders);
 
-  } catch(err) {
+  } catch (err) {
     logger.error("Error getting cancelled orders: " + err.message);
-    return res.status(500).json({message: "Error getting cancelled orders"});
+    return res.status(500).json({ message: "Error getting cancelled orders" });
   }
 }
 
-module.exports = { placeOrder, getUserOrders,cancelOrder, getAllOrders, getCurrentOrders, getPastOrders,getCancelledOrders, markAsDelivered};
+module.exports = { placeOrder, getUserOrders, cancelOrder, getAllOrders, getCurrentOrders, getPastOrders, getCancelledOrders, markAsDelivered };

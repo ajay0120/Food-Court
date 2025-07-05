@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "./api/axios"; // Axios instance with baseURL
+import axios from "./api/axios"; 
+import toast from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const Login = () => {
       localStorage.setItem("email", user.email);
       localStorage.setItem("role", user.role);
       localStorage.setItem("name",user.name);
+      toast.success("Login successful!");
       navigate(user.role === "admin" ? "/admin" : "/profile");
     } catch (err) {
       const message = err.response?.data?.message || "Login failed";
@@ -44,6 +46,7 @@ const Login = () => {
         ...prev,
         general: message,
       }));
+      toast.error(message);
     } finally {
       setLoading(false);
     }

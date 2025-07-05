@@ -1,3 +1,79 @@
 2025-07-05 16:33:06 [INFO]: authController loaded
 2025-07-05 16:33:47 [INFO]: Login endpoint called
 2025-07-05 16:33:47 [WARN]: Login attempt with non-existing email: haha@gmail.com
+2025-07-05 17:47:21 [INFO]: authController loaded
+2025-07-05 17:47:22 [INFO]: menuController loaded
+2025-07-05 17:47:22 [INFO]: cartController loaded
+2025-07-05 17:47:22 [INFO]: orderController loaded
+2025-07-05 17:48:38 [INFO]: Signup endpoint called
+2025-07-05 17:48:38 [INFO]: New user registered: ajaypothuganti@gmail.com
+2025-07-05 18:15:08 [INFO]: authController loaded
+2025-07-05 18:15:08 [INFO]: menuController loaded
+2025-07-05 18:15:08 [INFO]: cartController loaded
+2025-07-05 18:15:08 [INFO]: orderController loaded
+2025-07-05 18:17:07 [INFO]: Signup endpoint called
+2025-07-05 18:17:08 [INFO]: New user created: ajaypothuganti@gmail.com
+2025-07-05 18:17:12 [INFO]: OTP sent to ajaypothuganti@gmail.com for verification
+2025-07-05 18:18:20 [INFO]: Send OTP endpoint called
+2025-07-05 18:18:20 [INFO]: Old OTPs deleted for email: ajaypothuganti@gmail.com
+2025-07-05 18:18:20 [INFO]: New OTP created for email: ajaypothuganti@gmail.com
+2025-07-05 18:18:23 [INFO]: OTP sent to ajaypothuganti@gmail.com
+2025-07-05 18:18:50 [INFO]: Verify OTP endpoint called
+2025-07-05 18:18:50 [WARN]: Invalid or expired OTP attempt for email: ajaypothuganti@gmail.com
+2025-07-05 18:19:01 [INFO]: Verify OTP endpoint called
+2025-07-05 18:19:01 [INFO]: OTP deleted after successful verification for email: ajaypothuganti@gmail.com
+2025-07-05 18:19:01 [INFO]: OTP verified and JWT issued for email: ajaypothuganti@gmail.com
+2025-07-05 18:20:15 [INFO]: Login endpoint called
+2025-07-05 18:20:15 [WARN]: Login attempt with non-existing email: ajaypothuganti@gmail.com
+2025-07-05 18:23:12 [INFO]: Login endpoint called
+2025-07-05 18:23:12 [WARN]: Login attempt with non-existing email: ajaypothuganti@gmail.com
+2025-07-05 18:23:27 [INFO]: Signup endpoint called
+2025-07-05 18:23:27 [INFO]: New user created: ajaypothuganti@gmail.com
+2025-07-05 18:23:30 [INFO]: OTP sent to ajaypothuganti@gmail.com for verification
+2025-07-05 18:24:38 [INFO]: Send OTP endpoint called
+2025-07-05 18:24:38 [INFO]: Old OTPs deleted for email: ajaypothuganti@gmail.com
+2025-07-05 18:24:38 [INFO]: New OTP created for email: ajaypothuganti@gmail.com
+2025-07-05 18:24:42 [INFO]: OTP sent to ajaypothuganti@gmail.com
+2025-07-05 18:24:59 [INFO]: Verify OTP endpoint called
+2025-07-05 18:24:59 [INFO]: OTP deleted after successful verification for email: ajaypothuganti@gmail.com
+2025-07-05 18:24:59 [INFO]: OTP verified and JWT issued for email: ajaypothuganti@gmail.com
+2025-07-05 18:36:10 [INFO]: authController loaded
+2025-07-05 18:36:10 [INFO]: menuController loaded
+2025-07-05 18:36:10 [INFO]: cartController loaded
+2025-07-05 18:36:10 [INFO]: orderController loaded
+2025-07-05 18:36:28 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:28 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:28 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:28 [INFO]: Fetched 0 current orders
+2025-07-05 18:36:28 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:28 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:36:28 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:28 [INFO]: Fetched 8 past orders
+2025-07-05 18:36:28 [INFO]: Fetched 0 current orders
+2025-07-05 18:36:28 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:36:28 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:28 [INFO]: Fetched 8 past orders
+2025-07-05 18:36:46 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:46 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:46 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:46 [INFO]: Fetched 0 current orders
+2025-07-05 18:36:46 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:46 [INFO]: Fetched 8 past orders
+2025-07-05 18:36:46 [INFO]: Fetched 0 current orders
+2025-07-05 18:36:46 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:46 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:36:46 [INFO]: Fetched 8 past orders
+2025-07-05 18:36:46 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:36:46 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:40:31 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:40:31 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:40:31 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:40:31 [INFO]: Fetched 0 current orders
+2025-07-05 18:40:31 [INFO]: Fetching current orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:40:31 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:40:31 [INFO]: Fetched 8 past orders
+2025-07-05 18:40:31 [INFO]: Fetched 0 current orders
+2025-07-05 18:40:31 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:40:31 [INFO]: Fetching past orders for user 67f2a8d1276eaa92f3f3a0f6
+2025-07-05 18:40:31 [INFO]: Fetched 3 cancelled orders
+2025-07-05 18:40:31 [INFO]: Fetched 8 past orders
