@@ -2,6 +2,8 @@ const User = require("../models/user.js");
 const Food = require("../models/Food.js");
 const logger = require('../logger.js');
 
+logger.info("cartController loaded");
+
 const getCart = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate("cart.product");

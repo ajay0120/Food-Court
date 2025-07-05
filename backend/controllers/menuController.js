@@ -1,4 +1,7 @@
 const Food = require("../models/Food");
+const logger = require('../logger.js');
+
+logger.info("menuController loaded");
 
 // GET all menu items
 const getMenu = async (req, res) => {
@@ -34,6 +37,8 @@ const getMenu = async (req, res) => {
     const totalItems = await Food.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
+    logger.info(`Fetched menu items (page: ${page}, limit: ${limit}, type: ${type}, category: ${category}, search: ${search})`);
+
     res.status(200).json({
       items,
       pagination: {
@@ -44,7 +49,7 @@ const getMenu = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching menu:", error);
+    logger.error("Error fetching menu: " + error.message);
     res.status(500).json({ message: "Error fetching menu items" });
   }
 };
@@ -56,7 +61,7 @@ const addMenuItem = async (req, res) => {
       let { name, desc, img, price, type, category } = req.body;
   
       if (!name || !desc || !price?.org) {
-        console.log("name or desc or price.org should be present");
+        logger.warn("Attempt to add menu item with missing fields");
         return res.status(400).json({ message: "Name, description, and price are required" });
       }
   
@@ -73,7 +78,7 @@ const addMenuItem = async (req, res) => {
       });
   
       if (existingItem) {
-        console.log("item already present");
+        logger.warn(`Duplicate food item add attempt: ${normalizedName} [${category.join(", ")}]`);
         return res.status(400).json({ message: "Duplicate food item with same name and categories already exists" });
       }
   
@@ -86,11 +91,11 @@ const addMenuItem = async (req, res) => {
         type,
         category
       });
-      console.log(newItem);
+      logger.info(`New menu item created: ${normalizedName} [${category.join(", ")}]`);
       const savedItem = await newItem.save();
       res.status(201).json(savedItem);
     } catch (error) {
-      console.log("error adding menu items",error);
+      logger.error("Error adding menu items: " + error.message);
       res.status(400).json({ message: "Error adding menu item" });
     }
   };
@@ -105,8 +110,14 @@ const updateMenuItem = async (req, res) => {
       { $set: req.body },
       { new: true }
     );
+    if (!updatedItem) {
+      logger.warn(`Menu item not found: ${req.params.id}`);
+      return res.status(404).json({ message: "Menu item not found" });
+    }
+    logger.info(`Menu item updated: ${updatedItem.name} [${updatedItem.category.join(", ")}]`);
     res.status(200).json(updatedItem);
   } catch (error) {
+    logger.error("Error updating menu item: " + error.message);
     res.status(400).json({ message: "Error updating menu item" });
   }
 };
@@ -115,8 +126,10 @@ const updateMenuItem = async (req, res) => {
 const deleteMenuItem = async (req, res) => {
   try {
     await Food.findByIdAndDelete(req.params.id);
+    logger.info(`Menu item deleted: ${req.params.id}`);
     res.status(200).json({ message: "Item deleted successfully" });
   } catch (error) {
+    logger.error("Error deleting menu item: " + error.message);
     res.status(400).json({ message: "Error deleting menu item" });
   }
 };
