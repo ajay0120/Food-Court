@@ -141,3 +141,22 @@
 2025-07-05 18:44:16 [INFO]: Fetching cancelled orders for user 67f2a8d1276eaa92f3f3a0f6
 2025-07-05 18:44:16 [INFO]: Fetched 5 past orders
 2025-07-05 18:44:16 [INFO]: Fetched 2 cancelled orders
+2025-07-05 18:50:39 [INFO]: Signup endpoint called
+2025-07-05 18:50:39 [INFO]: New user created: 123@gmail.com
+2025-07-05 18:50:43 [INFO]: OTP sent to 123@gmail.com for verification
+2025-07-05 18:59:10 [INFO]: Send OTP endpoint called
+2025-07-05 18:59:10 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 18:59:10 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 18:59:14 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:00:42 [INFO]: Send OTP endpoint called
+2025-07-05 19:00:42 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:00:42 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:00:46 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:01:46 [INFO]: Send OTP endpoint called
+2025-07-05 19:01:46 [INFO]: Send OTP endpoint called
+2025-07-05 19:01:46 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:01:46 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:01:46 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:01:46 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:01:49 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:01:49 [INFO]: OTP sent to 123@gmail.com
