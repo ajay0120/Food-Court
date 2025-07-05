@@ -1,13 +1,14 @@
 const Order = require("../models/order");
 const Food =require("../models/Food");
+const logger = require('../logger.js');
+
+logger.info("orderController loaded");
+
 const placeOrder = async (req, res) => {
   const { items, total, paymentMethod } = req.body;
 
   try {
-    console.log("placing",req.user.id);
-    // const user = await User.findById(req.user.id); // Get the user from the request
-    // console.log("placing kinda",user);
-    // Create a new order
+    logger.info(`Placing order for user ${req.user.id}`);
     const newOrder = new Order({
       user: req.user.id,
       items,
@@ -16,16 +17,32 @@ const placeOrder = async (req, res) => {
       status: "Placed",
     });
 
+    // Validate items
+    for (const item of items) {
+      const foodItem = await Food.findById(item.product);
+      if (!foodItem) {
+        logger.warn(`Invalid food item in order: ${item.product}`);
+        return res.status(400).json({ message: "Invalid food item" });
+      }
+    }
+
+    // Calculate total price
+    let calculatedTotal = 0;
+    for (const item of items) {
+      const foodItem = await Food.findById(item.product);
+      if (foodItem) {
+        calculatedTotal += foodItem.price * item.quantity;
+      }
+    }
+    if (calculatedTotal !== total) {
+      logger.warn(`Total price mismatch: calculated ${calculatedTotal}, provided ${total}`);
+    }
     // Save the order
     await newOrder.save();
-
-    // // Add the new order to the user's orders
-    // user.orders.push(newOrder._id);
-    // await user.save(); // Save the user with the updated orders
-
+    logger.info(`Order placed successfully for user ${req.user.id} with order ID ${newOrder._id}`);
     res.status(200).json(newOrder);
   } catch (error) {
-    console.error("Error placing order:", error);
+    logger.error("Error placing order: " + error.message);
     res.status(500).json({ message: "Error placing order" });
   }
 };
@@ -33,13 +50,15 @@ const placeOrder = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     // console.log(req);
+    logger.info(`Fetching orders for user ${req.user.id}`);
+
     const orders = await Order.find({ user: req.user.id })
       .populate({
         path: 'items.product', 
         select: 'name price img category' 
       })
       .exec();
-
+    
     // console.log(orders); // Log the populated orders for debugging
     // orders.forEach(order => {
     //   order.items.forEach(item => {
@@ -57,12 +76,13 @@ const getUserOrders = async (req, res) => {
     // }
     // console.log(orders[0].items[0]._id.name);
     if (orders.length === 0) {
+      logger.warn(`No previous orders found for user ${req.user.id}`);
       return res.status(404).json({ message: "No previous orders found" });
     }
     // console.log(dishes);
     res.json(orders); // Return the populated orders
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error("Error fetching orders: " + error.message);
     res.status(500).json({ message: "Error fetching orders" });
   }
 };
@@ -72,11 +92,13 @@ const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
     if (!orderId) {
+      logger.warn("Order ID is required for cancellation");
       return res.status(400).json({ message: "Order ID is required" });
     }
 
     const order = await Order.findById(orderId);
     if (!order) {
+      logger.warn(`Order with ID ${orderId} does not exist`);
       return res.status(404).json({ message: "Order doesn't exist" });
     }
 
@@ -86,15 +108,17 @@ const cancelOrder = async (req, res) => {
     // }
 
     if (order.status !== "Placed") {
+      logger.warn(`Order with ID ${orderId} cannot be cancelled, current status: ${order.status}`);
       return res.status(400).json({ message: "Only placed orders can be cancelled" });
     }
 
     order.status = "Cancelled";
     await order.save();
 
+    logger.info(`Order ${orderId} cancelled by user ${req.user.id}`);
     return res.status(200).json({ message: "Order cancelled successfully" });
   } catch (err) {
-    console.error("Error cancelling order:", err);
+    logger.error(`Error cancelling order for user ${req.user.id}: ${err.message}`);
     return res.status(500).json({ message: "Error cancelling order" });
   }
 };
@@ -102,8 +126,9 @@ const cancelOrder = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    console.log("Hi How are you");
+    logger.info(`Fetching all orders by user ${req.user.id}`);
     if (req.user.role !== "admin") {
+      logger.warn(`Access denied for user ${req.user.id} to fetch all orders`);
       return res.status(403).json({ message: "Access denied" });
     }
     const orders = await Order.find()
@@ -116,78 +141,99 @@ const getAllOrders = async (req, res) => {
     select: 'name price img category',
   })
   .sort({ createdAt: -1 });
-    console.log(orders);
-    res.json(orders);
+  logger.info(`Fetched ${orders.length} orders`);
+  res.json(orders);
   } catch (err) {
+    logger.error("Error fetching all orders: " + err.message);
     res.status(500).json({ message: "Error fetching all orders" });
   }
 };
 
 const getCurrentOrders= async(req,res)=>{
   try{
+    logger.info(`Fetching current orders for user ${req.user.id}`);
     if(req.user.role !=="admin"){
+      logger.warn(`Access denied for user ${req.user.id} to fetch current orders`);
       return res.status(403).json({ message: "Access denied" });
     }
     const currentOrders = await Order.find({ status:  'Placed'  })
     .populate({ path: 'user', select: 'name username' })
     .populate({ path: 'items.product', select: 'name price img category' })
     .sort({ createdAt: -1 });
-    console.log(currentOrders);
+    logger.info(`Fetched ${currentOrders.length} current orders`);
     res.json(currentOrders);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching all orders" });
+    logger.error("Error fetching current orders: " + err.message);
+    res.status(500).json({ message: "Error fetching current orders" });
   }
 }
 
 const getPastOrders = async(req,res)=> {
   try{
+    logger.info(`Fetching past orders for user ${req.user.id}`);
     if(req.user.role!="admin"){
+      logger.warn(`Access denied for user ${req.user.id} to fetch past orders`);
       return res.status(403).json({message: "Access denied"});
     }
     const pastOrders= await Order.find({ status: 'Delivered' })
     .populate({ path: 'user', select: 'name username' })
     .populate({ path: 'items.product', select: 'name price img category' })
     .sort({ createdAt: -1 });
+    logger.info(`Fetched ${pastOrders.length} past orders`);
     // console.log(pastOrders);
     res.json(pastOrders);
   } catch{
+    logger.error("Error fetching past orders: " + err.message);
     res.status(500).json({message:"Error fetching all orders"});
   }
 }
 
 const markAsDelivered = async(req,res)=>{
   try{
+    logger.info(`Marking order as delivered for user ${req.user.id}`);
     if(req.user.role!="admin"){
+      logger.warn(`Access denied for user ${req.user.id} to mark order as delivered`);
       return res.status(403).json({message:"Access denied"});
     }
     const {orderId}=req.body;
-    if (!orderId) return res.status(400).json({ message: "Order ID is required" });
+    if (!orderId) {
+      logger.warn("Mark as delivered attempt without order ID");
+      return res.status(400).json({ message: "Order ID is required" });
+    }
     const orderExist=await Order.find({orderId});
-    if(!orderExist) return res.status(400).json({ message: "Order dosen't exist" });
+    if(!orderExist) {
+      logger.warn(`Order with ID ${orderId} does not exist`);
+      return res.status(400).json({ message: "Order doesn't exist" });
+    }
     await Order.updateOne(
       {_id:orderId},
       {$set:{status : "Delivered"}}
     );
+    logger.info(`Order ${orderId} marked as delivered by user ${req.user.id}`);
     return res.status(200).json({ message: "Order marked as delivered" });
   } catch{
+    logger.error("Error in marking order as delivered: " + err.message);
     res.status(500).json({message:"Error in marking"});
   }
-  
 
 }
 
 const getCancelledOrders = async (req,res) => {
   try{
+    logger.info(`Fetching cancelled orders for user ${req.user.id}`);
     if(req.user.role !== "admin"){
+      logger.warn(`Access denied for user ${req.user.id} to fetch cancelled orders`);
       return res.status(403).json({message: "Access denied"});
     }
     const cancelledOrders= await Order.find({ status: 'Cancelled' })
     .populate({ path: 'user', select: 'name username' })
     .populate({ path: 'items.product', select: 'name price img category' })
     .sort({ createdAt: -1 });
+    logger.info(`Fetched ${cancelledOrders.length} cancelled orders`);
     res.json(cancelledOrders);
 
-  } catch{
+  } catch(err) {
+    logger.error("Error getting cancelled orders: " + err.message);
     return res.status(500).json({message: "Error getting cancelled orders"});
   }
 }
