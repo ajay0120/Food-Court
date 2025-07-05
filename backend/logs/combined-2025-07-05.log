@@ -160,3 +160,46 @@
 2025-07-05 19:01:46 [INFO]: New OTP created for email: 123@gmail.com
 2025-07-05 19:01:49 [INFO]: OTP sent to 123@gmail.com
 2025-07-05 19:01:49 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:07:07 [INFO]: Verify OTP endpoint called
+2025-07-05 19:07:07 [WARN]: Invalid or expired OTP attempt for email: 123@gmail.com
+2025-07-05 19:07:16 [INFO]: Verify OTP endpoint called
+2025-07-05 19:07:16 [WARN]: Invalid or expired OTP attempt for email: 123@gmail.com
+2025-07-05 19:07:17 [INFO]: Send OTP endpoint called
+2025-07-05 19:07:17 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:07:17 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:07:20 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:07:32 [INFO]: Verify OTP endpoint called
+2025-07-05 19:07:32 [INFO]: OTP deleted after successful verification for email: 123@gmail.com
+2025-07-05 19:07:32 [INFO]: OTP verified and JWT issued for email: 123@gmail.com
+2025-07-05 19:08:04 [INFO]: Signup endpoint called
+2025-07-05 19:08:04 [INFO]: New user created: 123@gmail.com
+2025-07-05 19:08:07 [INFO]: OTP sent to 123@gmail.com for verification
+2025-07-05 19:08:22 [INFO]: Send OTP endpoint called
+2025-07-05 19:08:22 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:08:22 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:08:25 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:10:26 [INFO]: Send OTP endpoint called
+2025-07-05 19:10:26 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:10:26 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:10:29 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:10:39 [INFO]: Verify OTP endpoint called
+2025-07-05 19:10:39 [INFO]: OTP deleted after successful verification for email: 123@gmail.com
+2025-07-05 19:10:39 [INFO]: OTP verified and JWT issued for email: 123@gmail.com
+2025-07-05 19:11:00 [INFO]: Signup endpoint called
+2025-07-05 19:11:00 [INFO]: New user created: 123@gmail.com
+2025-07-05 19:11:03 [INFO]: OTP sent to 123@gmail.com for verification
+2025-07-05 19:11:03 [INFO]: Send OTP endpoint called
+2025-07-05 19:11:03 [INFO]: Send OTP endpoint called
+2025-07-05 19:11:03 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:11:03 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:11:03 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:11:03 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:11:06 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:11:07 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:15:25 [INFO]: Send OTP endpoint called
+2025-07-05 19:15:25 [INFO]: Old OTPs deleted for email: 123@gmail.com
+2025-07-05 19:15:25 [INFO]: New OTP created for email: 123@gmail.com
+2025-07-05 19:15:29 [INFO]: OTP sent to 123@gmail.com
+2025-07-05 19:15:53 [INFO]: Verify OTP endpoint called
+2025-07-05 19:15:53 [INFO]: OTP deleted after successful verification for email: 123@gmail.com
+2025-07-05 19:15:53 [INFO]: OTP verified and JWT issued for email: 123@gmail.com
