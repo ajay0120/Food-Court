@@ -7,18 +7,22 @@ function Navbar() {
     const navigate = useNavigate();
     const [username, setUsername] = useState(null);
     const { cartItems } = useCart();
-    const userRole =localStorage.getItem("role");
+    const [userRole, setUserRole] = useState(null);
     useEffect(() => {
         const storedUsername = localStorage.getItem("username");
         if (storedUsername) {
             setUsername(storedUsername);
         }
-    }, []);
+        const storedRole = localStorage.getItem("role");
+        if (storedRole) {
+            setUserRole(storedRole);
+            }
+        }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("username");
+        localStorage.clear();
         setUsername(null);
+        setUserRole(null);
         navigate("/login");
     };
 
