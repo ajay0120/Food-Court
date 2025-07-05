@@ -25,6 +25,14 @@ const UserSchema = new mongoose.Schema(
       enum: ["student", "admin"],
       default: "student",
     },
+    verified: {
+      type: Boolean,
+      default: false, 
+    },
+    otpTries: { 
+      type: Number, 
+      default: 0,
+    },
     img: {
       type: String, // For profile image (URL or file path)
       default: null,
