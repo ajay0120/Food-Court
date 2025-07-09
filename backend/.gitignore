@@ -26,3 +26,5 @@ coverage/
 
 # Build output
 dist/
+
+logs
