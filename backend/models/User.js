@@ -1,5 +1,5 @@
 const mongoose =require("mongoose") ;
-
+const { USER_ROLES } = require("../constants/userEnums");
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["student", "admin"],
+      enum: USER_ROLES,
       default: "student",
     },
     verified: {
@@ -34,7 +34,7 @@ const UserSchema = new mongoose.Schema(
       default: 0,
     },
     img: {
-      type: String, // For profile image (URL or file path)
+      type: String, 
       default: null,
     },
     favourites: {

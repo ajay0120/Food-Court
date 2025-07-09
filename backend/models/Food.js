@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const { FOOD_TYPES, FOOD_CATEGORIES} = require("../constants/foodEnums");
 
 const FoodSchema = new mongoose.Schema(
   {
@@ -14,7 +14,7 @@ const FoodSchema = new mongoose.Schema(
     img: {
       type: String,
       validate: {
-        validator: function(value) {
+        validator: function (value) {
           return /^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i.test(value);
         },
         message: "Invalid image URL format",
@@ -23,28 +23,29 @@ const FoodSchema = new mongoose.Schema(
     },
     price: {
       type: {
-        org: { type: Number,default: 0.0 },
-        mrp: { 
-          type: Number, 
-          validate:{
-            validator: function(v){
-              return v>=this.org;
+        org: { type: Number, default: 0.0 },
+        mrp: {
+          type: Number,
+          validate: {
+            validator: function (v) {
+              return v >= this.org;
             },
             message: "Org price cannot be more than mrp",
           },
-          default: 0.0 },
+          default: 0.0,
+        },
         off: { type: Number, default: 0 },
       },
       default: { org: 0.0, mrp: 0.0, off: 0 },
     },
     type: {
       type: String,
-      enum: ["veg", "non-veg"],
+      enum: FOOD_TYPES,
       required: true,
     },
     category: {
       type: [String],
-      enum: ["indian", "chinese", "snack", "beverage", "dessert", "continental","american"],
+      enum: FOOD_CATEGORIES,
       default: [],
       index: true,
     },
@@ -57,4 +58,3 @@ const FoodSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Food", FoodSchema);
-

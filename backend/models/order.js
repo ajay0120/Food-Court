@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ORDER_STATUSES, PAYMENT_METHODS } = require("../constants/orderEnums");
 
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -9,10 +10,14 @@ const orderSchema = new mongoose.Schema({
     },
   ],
   total: { type: Number, required: true },
-  paymentMethod: { type: String, required: true },
+  paymentMethod: {
+    type: String,
+    enum: PAYMENT_METHODS,
+    required: true,
+  },
   status: {
     type: String,
-    enum: ["Placed", "Delivered", "Cancelled"],
+    enum: ORDER_STATUSES,
     default: "Placed",
   },
   createdAt: { type: Date, default: Date.now },

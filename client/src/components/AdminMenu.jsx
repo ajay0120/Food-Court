@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./Navbar";
+import { FOOD_TYPES, FOOD_CATEGORIES } from "../constants/foodEnums";
 
 const AdminMenu = () => {
   const [menu, setMenu] = useState([]);
@@ -10,9 +11,9 @@ const AdminMenu = () => {
     name: "",
     desc: "",
     img: "",
-    price: { org: 0, mrp: 0, off: 0 },
+    price: { org: "", mrp: "", off: 0 },
     type: "",
-    category: "",
+    category: [],
     inStock: "",
   });
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -57,7 +58,7 @@ const AdminMenu = () => {
   const handleAdd = async () => {
     const payload = {
       ...form,
-      category: form.category.split(",").map((c) => c.trim().toLowerCase()),
+      category: form.category,
       price: {
         org: Number(form.price.org),
         mrp: Number(form.price.mrp),
@@ -258,7 +259,6 @@ const AdminMenu = () => {
       </div>
 
       {/* Modal */}
-      {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-gray-800 text-white p-6 rounded-lg w-full max-w-md space-y-3">
@@ -296,15 +296,21 @@ const AdminMenu = () => {
             <label className="block mb-1 font-semibold">Prices:</label>
             <div className="flex gap-2">
               <div className="flex flex-col w-1/3">
-                <label className="text-sm mb-1" htmlFor="orgPrice">Org Price:</label>
+                <label className="text-sm mb-1" htmlFor="orgPrice">Our Price:</label>
                 <input
                   id="orgPrice"
                   className="p-2 rounded bg-gray-700 text-white"
                   type="number"
                   value={form.price.org}
-                  onChange={(e) =>
-                    setForm({ ...form, price: { ...form.price, org: e.target.value } })
-                  }
+                  onChange={(e) => {
+                    const org = e.target.value === "" ? "" : Number(e.target.value);
+                    const mrp = form.price.mrp === "" ? 0 : Number(form.price.mrp);
+                    const off = mrp > 0 && org !== "" ? Math.round(((mrp - org) / mrp) * 100) : 0;
+                    setForm({
+                      ...form,
+                      price: { ...form.price, org, off }
+                    });
+                  }}
                 />
               </div>
 
@@ -315,9 +321,15 @@ const AdminMenu = () => {
                   className="p-2 rounded bg-gray-700 text-white"
                   type="number"
                   value={form.price.mrp}
-                  onChange={(e) =>
-                    setForm({ ...form, price: { ...form.price, mrp: e.target.value } })
-                  }
+                  onChange={(e) => {
+                    const mrp = e.target.value === "" ? "" : Number(e.target.value);
+                    const org = form.price.org === "" ? 0 : Number(form.price.org);
+                    const off = mrp > 0 && org !== "" ? Math.round(((mrp - org) / mrp) * 100) : 0;
+                    setForm({
+                      ...form,
+                      price: { ...form.price, mrp, off }
+                    });
+                  }}
                 />
               </div>
 
@@ -328,30 +340,45 @@ const AdminMenu = () => {
                   className="p-2 rounded bg-gray-700 text-white"
                   type="number"
                   value={form.price.off}
-                  onChange={(e) =>
-                    setForm({ ...form, price: { ...form.price, off: e.target.value } })
-                  }
+                  readOnly
                 />
               </div>
             </div>
 
             <label className="block mb-1 font-semibold" htmlFor="type">Type:</label>
-            <input
+            <select
               id="type"
               className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Enter type"
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
-            />
+            >
+              <option value="">Select type</option>
+              {FOOD_TYPES.map((type) => (
+                <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+              ))}
+            </select>
 
-            <label className="block mb-1 font-semibold" htmlFor="category">Category (comma separated):</label>
-            <input
-              id="category"
-              className="w-full p-2 rounded bg-gray-700 text-white"
-              placeholder="Enter categories"
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            />
+            <label className="block mb-1 font-semibold">Category:</label>
+            <div className="grid grid-cols-2 gap-2">
+              {FOOD_CATEGORIES.map((cat) => (
+                <label key={cat} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    value={cat}
+                    checked={form.category.includes(cat)}
+                    onChange={(e) => {
+                      const updatedCategories = e.target.checked
+                        ? [...form.category, cat]
+                        : form.category.filter((c) => c !== cat);
+                      setForm({ ...form, category: updatedCategories });
+                    }}
+                    className="accent-green-500"
+                  />
+                  <span>{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                </label>
+              ))}
+            </div>
+
 
             <label className="block mb-1">Availability:</label>
             <select
