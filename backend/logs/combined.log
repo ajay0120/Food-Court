@@ -1,7 +1,0 @@
-2025-07-05 16:11:40 [INFO]: authController loaded
-2025-07-05 16:17:24 [INFO]: Login endpoint called
-2025-07-05 16:17:24 [INFO]: Login successful for email: suraj@gmail.com
-2025-07-05 16:17:56 [INFO]: Login endpoint called
-2025-07-05 16:17:56 [WARN]: Login attempt with non-existing email: haha@gmail.com
-2025-07-05 16:30:41 [INFO]: Login endpoint called
-2025-07-05 16:30:41 [WARN]: Login attempt with non-existing email: haha@gmail.com
