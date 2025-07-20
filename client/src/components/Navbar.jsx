@@ -6,19 +6,28 @@ import Avatar from "react-avatar";
 
 function Navbar() {
     const navigate = useNavigate();
-    const [username, setUsername] = useState(null);
     const { cartItems } = useCart();
+    const [username, setUsername] = useState(null);
     const [userRole, setUserRole] = useState(null);
+
     useEffect(() => {
-        const storedUsername = localStorage.getItem("username");
-        if (storedUsername) {
-            setUsername(storedUsername);
-        }
-        const storedRole = localStorage.getItem("role");
-        if (storedRole) {
-            setUserRole(storedRole);
-            }
-        }, []);
+        refreshUserData();
+    }, []);
+
+    // Listen for storage changes (cross-tab sync)
+    useEffect(() => {
+        const handleStorageChange = () => refreshUserData();
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
+
+    const refreshUserData = () => {
+        const username = localStorage.getItem("username");
+        const role = localStorage.getItem("role");
+        console.log("🔄 Refreshing user data - Username:", username, "Role:", role);
+        setUsername(username);
+        setUserRole(role);
+    };
 
     const handleLogout = () => {
         localStorage.clear();
@@ -27,17 +36,42 @@ function Navbar() {
         navigate("/login");
     };
 
+    const handleProfileNavigation = () => {
+        const currentUsername = localStorage.getItem("username");
+        const currentRole = localStorage.getItem("role");
+        const currentToken = localStorage.getItem("token");
+
+        console.log("=== Profile Navigation Debug ===");
+        console.log("Username:", currentUsername);
+        console.log("Role:", currentRole);
+        console.log("Token exists:", !!currentToken);
+        console.log("Token value:", currentToken?.substring(0, 20) + "...");
+        console.log("Current URL:", window.location.href);
+
+        if (!currentUsername || !currentToken) {
+            console.log("❌ Missing username or token, redirecting to login");
+            alert("Please login first");
+            navigate("/login");
+            return;
+        }
+
+        if (currentRole?.toLowerCase() === "admin") {
+            console.log("✅ Admin user, navigating to /admin");
+            navigate("/admin");
+        } else {
+            console.log("✅ Regular user, navigating to /profile");
+            navigate("/profile");
+        }
+        console.log("=== Navigation attempt completed ===");
+    };
+
     return (
         <div className="bg-gradient-to-r from-black via-gray-900 to-black text-white w-full shadow-2xl border-b border-gray-800">
-            {/* Top bar */}
+            {console.log("🎯 Navbar render - Username:", username, "UserRole:", userRole)}
             <div className="w-full flex items-center justify-between px-4 md:px-10 py-6">
-                {/* Left placeholder (optional) */}
-                <div className="w-1/3 flex justify-start">
-                    {/* Reserved for future elements */}
-                </div>
+                <div className="w-1/3 flex justify-start" />
 
-                {/* Center title */}
-                <motion.div 
+                <motion.div
                     className="w-1/3 flex justify-start lg:justify-center"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -51,7 +85,6 @@ function Navbar() {
                     </h1>
                 </motion.div>
 
-                {/* Right side: cart, profile, login/logout */}
                 <div className="w-1/3 flex justify-end items-center gap-3">
                     <motion.button
                         onClick={() => navigate("/cart")}
@@ -61,7 +94,7 @@ function Navbar() {
                     >
                         <span className="text-lg md:text-xl group-hover:scale-110 transition-transform duration-300">🛒</span>
                         {(cartItems?.length || 0) > 0 && (
-                            <motion.span 
+                            <motion.span
                                 className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-1.5 py-0.5 text-xs font-bold shadow-lg min-w-[18px] h-[18px] flex items-center justify-center"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
@@ -75,19 +108,16 @@ function Navbar() {
                     {username ? (
                         <>
                             <motion.button
-                                onClick={() =>
-                                    {
-                                        if(userRole!=="admin") {
-                                            navigate("/profile")
-                                        }
-                                        else{
-                                            navigate("/admin");
-                                        }
-                                    }
-                                }
+                                onClick={(e) => {
+                                    console.log("🖱️ Avatar button clicked!");
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleProfileNavigation();
+                                }}
                                 className="text-white hover:scale-110 transition-transform duration-300 rounded-full cursor-pointer shadow-lg"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
+                                style={{ pointerEvents: 'auto', zIndex: 10 }}
                             >
                                 <Avatar
                                     color={Avatar.getRandomColor("sitebase", ["blue"])}
