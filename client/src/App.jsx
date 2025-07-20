@@ -16,6 +16,9 @@ import Payment from "./Payment/Payment";
 import AdminRoute from "./components/AdminRoute";
 import AdminProfile from "./components/AdminProfile";
 import VerifyEmail from "./components/VerifyEmail";
+import TodayOffers from "./components/TodayOffers";
+import ContactUs from "./components/ContactUs";
+import AboutUs from "./components/AboutUs";
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/offers" element={<TodayOffers />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route
             path="/profile"
             element={

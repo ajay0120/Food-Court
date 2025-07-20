@@ -2,6 +2,7 @@ import { Toaster } from 'react-hot-toast';
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Plus, Minus, ShoppingCart, Utensils } from "lucide-react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import { fetchCartData, updateCartItem } from "../services/cartService";
@@ -223,7 +224,8 @@ function Menu() {
               <option value="" className="bg-gray-800 text-gray-400 py-2">Categories</option>
               {uniqueCategories.map((cat, index) => (
                 <option key={`${cat}-${index}`} value={cat} className="bg-gray-800 text-white py-2 hover:bg-gray-700 capitalize">
-                  🍽️ {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  <Utensils size={20} className="mr-2" />
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </option>
               ))}
             </motion.select>
@@ -327,7 +329,7 @@ function Menu() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                           >
-                            −
+                            <Minus size={14} />
                           </motion.button>
                           <span className="text-lg font-bold text-white min-w-[1.5rem] text-center">
                             {cart[item._id]}
@@ -338,7 +340,7 @@ function Menu() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                           >
-                            +
+                            <Plus size={14} />
                           </motion.button>
                         </div>
                       ) : (
@@ -349,7 +351,7 @@ function Menu() {
                           whileTap={{ scale: 0.95 }}
                         >
                           <span className="flex items-center justify-center gap-2">
-                            <span className="group-hover:scale-110 transition-transform duration-300">🛒</span>
+                            <ShoppingCart size={16} className="group-hover:scale-110 transition-transform duration-300" />
                             Add to Cart
                           </span>
                         </motion.button>

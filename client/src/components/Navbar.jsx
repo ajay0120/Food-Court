@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ShoppingCart, LogOut } from "lucide-react";
 import { useCart } from "../context/cartContext";
 import Avatar from "react-avatar";
 
@@ -92,7 +93,7 @@ function Navbar() {
                         whileHover={{ scale: 1.1, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        <span className="text-lg md:text-xl group-hover:scale-110 transition-transform duration-300">🛒</span>
+                        <ShoppingCart size={20} className="group-hover:scale-110 transition-transform duration-300" />
                         {(cartItems?.length || 0) > 0 && (
                             <motion.span
                                 className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-1.5 py-0.5 text-xs font-bold shadow-lg min-w-[18px] h-[18px] flex items-center justify-center"
@@ -128,10 +129,11 @@ function Navbar() {
                             </motion.button>
                             <motion.button
                                 onClick={handleLogout}
-                                className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-5 py-2.5 rounded-xl text-sm md:text-base hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-300 cursor-pointer shadow-lg font-semibold border border-red-400/30 hover:border-red-300/50 hover:shadow-red-500/25 hover:shadow-xl backdrop-blur-sm"
+                                className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-5 py-2.5 rounded-xl text-sm md:text-base hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-300 cursor-pointer shadow-lg font-semibold border border-red-400/30 hover:border-red-300/50 hover:shadow-red-500/25 hover:shadow-xl backdrop-blur-sm flex items-center gap-2"
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                             >
+                                <LogOut size={16} />
                                 Logout
                             </motion.button>
                         </>

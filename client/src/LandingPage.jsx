@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Utensils } from "lucide-react";
 import axios from "axios";
 import Navbar from "./components/Navbar";
 
@@ -256,7 +257,7 @@ function LandingPage() {
               whileHover={{ x: 5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <span className="text-2xl">🍽️</span>
+              <Utensils size={32} className="text-orange-400" />
               <span className="text-xl ml-1">→</span>
             </motion.div>
           </span>

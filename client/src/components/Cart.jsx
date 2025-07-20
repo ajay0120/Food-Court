@@ -1,3 +1,4 @@
+import { ShoppingCart, Plus, Minus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
@@ -170,7 +171,7 @@ function Cart() {
             transition={{ duration: 0.6 }}
           >
             <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-12 max-w-md mx-auto">
-              <div className="text-6xl mb-4">🛒</div>
+              <ShoppingCart size={64} className="mb-4 text-gray-400" />
               <p className="text-xl text-gray-300 mb-4">Your cart is empty</p>
               <p className="text-gray-400 mb-6">Add some delicious items to get started!</p>
               <motion.button
@@ -254,7 +255,7 @@ function Cart() {
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          −
+                          <Minus size={14} />
                         </motion.button>
                         <span className="text-lg font-bold text-white min-w-[1.5rem] text-center">
                           {item.quantity}
@@ -265,7 +266,7 @@ function Cart() {
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          +
+                          <Plus size={14} />
                         </motion.button>
                       </div>
                       

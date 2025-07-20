@@ -1,4 +1,6 @@
 import React from "react";
+import { motion } from "framer-motion";
+import { User, Tag, Mail, BarChart3, Calendar, Package, CheckCircle } from "lucide-react";
 import Avatar from "react-avatar";
 
 function PersonalInfo() {
@@ -7,59 +9,131 @@ function PersonalInfo() {
   const name = localStorage.getItem("name");
 
   return (
-    <div className="min-h-screen flex justify-center items-center py-12 bg-black text-white">
-      <div className="bg-gray-800 shadow-xl rounded-lg overflow-hidden w-full max-w-4xl">
+    <div className="flex justify-center items-start py-8">
+      <motion.div 
+        className="bg-gray-800/80 backdrop-blur-sm border border-gray-700 shadow-2xl rounded-2xl overflow-hidden w-full max-w-4xl"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         {/* Header */}
-        <div className="bg-orange-500 text-white py-5 px-6">
-          <h1 className="text-2xl font-semibold">Personal Information</h1>
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-6 px-8">
+          <div className="flex items-center space-x-4">
+            <Avatar
+              color={Avatar.getRandomColor("sitebase", ["blue"])}
+              name={username}
+              size="70"
+              round={true}
+            />
+            <div>
+              <h1 className="text-2xl font-bold">Personal Information</h1>
+              <p className="text-orange-100 mt-1">Manage your account details</p>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="px-8 py-10">
-          {/* Avatar and Basic Info */}
-          <div className="flex items-center space-x-4 ">
+        <div className="px-8 py-8">
+          {/* User Summary */}
+          <motion.div 
+            className="flex items-center space-x-6 mb-8 p-4 bg-gray-700/30 rounded-xl"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <Avatar
               color={Avatar.getRandomColor("sitebase", ["blue"])}
               name={username}
               size="80"
               round={true}
-              className="mb-4"
             />
-            <div className="flex-col  ">
-                <h2 className="text-xl  font-medium">{name}</h2>
-                <p className="text-sm ">{email}</p>
+            <div>
+              <h2 className="text-2xl font-semibold text-white">{name}</h2>
+              <p className="text-gray-400 text-lg">{email}</p>
+              <p className="text-orange-400 text-sm mt-1">@{username}</p>
             </div>
-            
-          </div>
+          </motion.div>
 
           {/* Detailed Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name */}
-            <div className="mb-5">
-              <h2 className="text-gray-300 mb-1">Name</h2>
-              <div className="bg-gray-100 rounded-md px-4 py-3 text-gray-800">
+            <motion.div 
+              className="mb-5"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <h3 className="text-gray-300 mb-3 font-medium flex items-center gap-2">
+                <User size={18} className="text-orange-400" /> Full Name
+              </h3>
+              <div className="bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-4 text-white font-medium hover:border-orange-500/50 transition-colors duration-300">
                 {name}
               </div>
-            </div>
+            </motion.div>
 
             {/* Username */}
-            <div className="mb-5">
-              <h2 className="text-gray-300 mb-1">Username</h2>
-              <div className="bg-gray-100 rounded-md px-4 py-3 text-gray-800">
+            <motion.div 
+              className="mb-5"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <h3 className="text-gray-300 mb-3 font-medium flex items-center gap-2">
+                <Tag size={18} className="text-blue-400" /> Username
+              </h3>
+              <div className="bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-4 text-white font-medium hover:border-orange-500/50 transition-colors duration-300">
                 {username}
               </div>
-            </div>
+            </motion.div>
 
             {/* Email */}
-            <div className="mb-5">
-              <h2 className="text-gray-300 mb-1">Email</h2>
-              <div className="bg-gray-100 rounded-md px-4 py-3 text-gray-800">
+            <motion.div 
+              className="mb-5 md:col-span-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <h3 className="text-gray-300 mb-3 font-medium flex items-center gap-2">
+                <Mail size={18} className="text-green-400" /> Email Address
+              </h3>
+              <div className="bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-4 text-white font-medium hover:border-orange-500/50 transition-colors duration-300">
                 {email}
               </div>
-            </div>
+            </motion.div>
           </div>
+
+          {/* Account Stats */}
+          <motion.div 
+            className="mt-8 p-6 bg-gray-700/30 rounded-xl border border-gray-600"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <BarChart3 size={20} className="text-purple-400" /> Account Statistics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div className="p-3 bg-gray-800/50 rounded-lg">
+                <Calendar size={20} className="mx-auto mb-2 text-blue-400" />
+                <p className="text-gray-400 text-sm">Member Since</p>
+                <p className="text-white font-semibold">January 2025</p>
+              </div>
+              <div className="p-3 bg-gray-800/50 rounded-lg">
+                <Package size={20} className="mx-auto mb-2 text-orange-400" />
+                <p className="text-gray-400 text-sm">Total Orders</p>
+                <p className="text-white font-semibold">12</p>
+              </div>
+              <div className="p-3 bg-gray-800/50 rounded-lg">
+                <CheckCircle size={20} className="mx-auto mb-2 text-green-400" />
+                <p className="text-gray-400 text-sm">Account Status</p>
+                <span className="inline-block bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
+                  Active
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
