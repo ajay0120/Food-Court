@@ -62,7 +62,7 @@ const Profile = () => {
           </button>
           <button
             onClick={() => setActiveSection("orders")}
-            className={`w-full text-left px-4 py-2 rounded-lg cursor-pointer${
+            className={`w-full text-left px-4 py-2 rounded-lg cursor-pointer ${
               activeSection === "orders" ? "bg-orange-500" : "bg-gray-800"
             } hover:bg-orange-500`}
           >
@@ -110,7 +110,7 @@ const Profile = () => {
               {renderSubSection()}
             </>
           )}
-
+          
           {activeSection === "orders" && <PreviousOrders />}
         </div>
       </div>

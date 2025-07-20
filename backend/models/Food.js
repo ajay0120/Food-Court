@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { FOOD_TYPES, FOOD_CATEGORIES} = require("../constants/foodEnums");
+const { FOOD_TYPES, FOOD_CATEGORIES} = require("../../common/foodEnums");
 
 const FoodSchema = new mongoose.Schema(
   {

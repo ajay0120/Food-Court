@@ -8,4 +8,3 @@ export const FOOD_CATEGORIES = [
   "continental",
   "american",
 ];
-

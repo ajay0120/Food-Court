@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ORDER_STATUSES, PAYMENT_METHODS } = require("../constants/orderEnums");
+const { ORDER_STATUSES, PAYMENT_METHODS } = require("../../common/orderEnums");
 
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./Navbar";
-import { FOOD_TYPES, FOOD_CATEGORIES } from "../constants/foodEnums";
+import { FOOD_TYPES, FOOD_CATEGORIES } from "../../../common/foodEnums";
 
 const AdminMenu = () => {
   const [menu, setMenu] = useState([]);

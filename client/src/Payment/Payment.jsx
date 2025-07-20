@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { PAYMENT_METHODS } from "../../../common/orderEnums"; 
 
 function Payment() {
   const [cartItems, setCartItems] = useState([]);
@@ -51,7 +52,7 @@ function Payment() {
   const placeOrder = async (paymentMethod) => {
     try {
       const token = localStorage.getItem("token");
-
+      console.log("paymentMethod:", paymentMethod);
       const res = await axios.post(
         "http://localhost:5000/api/orders",
         {
@@ -111,7 +112,7 @@ function Payment() {
       <div className="bg-gray-800 p-5 rounded-lg">
         <h3 className="text-xl mb-3 font-semibold">Select Payment Method</h3>
         <button
-          onClick={() => placeOrder("Cash on Delivery")}
+          onClick={() => placeOrder(PAYMENT_METHODS[0])} // Using PAYMENT_METHODS[0] is cash
           className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600 mr-4 cursor-pointer"
         >
           Cash on Delivery

@@ -31,11 +31,13 @@ const placeOrder = async (req, res) => {
     for (const item of items) {
       const foodItem = await Food.findById(item.product);
       if (foodItem) {
-        calculatedTotal += foodItem.price * item.quantity;
+        calculatedTotal += foodItem.price.org * item.quantity;
       }
     }
-    if (calculatedTotal !== total) {
+    console.log("calculatedTotal", calculatedTotal);
+    if (!Number.isFinite(calculatedTotal) || calculatedTotal !== total) {
       logger.warn(`Total price mismatch: calculated ${calculatedTotal}, provided ${total}`);
+      return res.status(400).json({ message: "Total price mismatch" });
     }
     // Save the order
     await newOrder.save();
