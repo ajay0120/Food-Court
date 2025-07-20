@@ -238,7 +238,15 @@ function Menu() {
 
         {/* Menu Grid */}
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto"
+          className={`grid gap-8 max-w-7xl mx-auto ${
+            menu.length === 1 
+              ? 'grid-cols-1 justify-items-center' 
+              : menu.length === 2 
+              ? 'grid-cols-1 sm:grid-cols-2 justify-items-center sm:justify-items-stretch' 
+              : menu.length === 3 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center lg:justify-items-stretch' 
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+          }`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -312,21 +320,21 @@ function Menu() {
                   <div className="w-full">
                     {!isOutOfStock ? (
                       cart[item._id] ? (
-                        <div className="flex items-center justify-center gap-4 bg-gray-700/50 rounded-2xl p-3">
+                        <div className="flex items-center justify-center gap-3 bg-gray-700/50 rounded-2xl p-2.5">
                           <motion.button
                             onClick={() => handleQuantityChange(item._id, -1)}
-                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white w-10 h-10 rounded-full font-bold transition-all duration-300 cursor-pointer shadow-lg"
+                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white w-8 h-8 rounded font-bold transition-all duration-300 cursor-pointer shadow-lg text-sm flex items-center justify-center"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                           >
                             −
                           </motion.button>
-                          <span className="text-xl font-bold text-white min-w-[2rem] text-center">
+                          <span className="text-lg font-bold text-white min-w-[1.5rem] text-center">
                             {cart[item._id]}
                           </span>
                           <motion.button
                             onClick={() => handleQuantityChange(item._id, 1)}
-                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white w-10 h-10 rounded-full font-bold transition-all duration-300 cursor-pointer shadow-lg"
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white w-8 h-8 rounded font-bold transition-all duration-300 cursor-pointer shadow-lg text-sm flex items-center justify-center"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                           >
@@ -360,7 +368,7 @@ function Menu() {
 
         {/* Pagination */}
         <motion.div 
-          className="flex justify-center items-center mt-16 gap-4"
+          className="flex justify-center items-center mt-16 gap-3"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
@@ -368,15 +376,15 @@ function Menu() {
           <motion.button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             disabled={page === 1}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white px-8 py-4 rounded-2xl font-semibold disabled:opacity-50 transition-all duration-300 cursor-pointer shadow-lg"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white px-5 py-2.5 rounded-xl font-medium disabled:opacity-50 transition-all duration-300 cursor-pointer shadow-lg text-sm"
             whileHover={{ scale: page === 1 ? 1 : 1.05, y: page === 1 ? 0 : -2 }}
             whileTap={{ scale: 0.95 }}
           >
             ← Previous
           </motion.button>
           
-          <div className="bg-gray-800/80 backdrop-blur-sm px-8 py-4 rounded-2xl border border-gray-700">
-            <span className="text-white font-semibold text-lg">
+          <div className="bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+            <span className="text-white font-medium text-sm">
               Page {page} of {totalPages}
             </span>
           </div>
@@ -384,7 +392,7 @@ function Menu() {
           <motion.button
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={page === totalPages}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white px-8 py-4 rounded-2xl font-semibold disabled:opacity-50 transition-all duration-300 cursor-pointer shadow-lg"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white px-5 py-2.5 rounded-xl font-medium disabled:opacity-50 transition-all duration-300 cursor-pointer shadow-lg text-sm"
             whileHover={{ scale: page === totalPages ? 1 : 1.05, y: page === totalPages ? 0 : -2 }}
             whileTap={{ scale: 0.95 }}
           >

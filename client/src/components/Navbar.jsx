@@ -52,17 +52,17 @@ function Navbar() {
                 </motion.div>
 
                 {/* Right side: cart, profile, login/logout */}
-                <div className="w-1/3 flex justify-end items-center gap-4">
+                <div className="w-1/3 flex justify-end items-center gap-3">
                     <motion.button
                         onClick={() => navigate("/cart")}
-                        className="relative bg-gradient-to-r from-gray-800 to-gray-700 text-white p-3 md:p-4 rounded-full hover:from-orange-600 hover:to-orange-500 transition-all duration-300 cursor-pointer shadow-lg group"
+                        className="relative bg-gradient-to-r from-gray-800 to-gray-700 text-white p-2.5 md:p-3 rounded-full hover:from-orange-600 hover:to-orange-500 transition-all duration-300 cursor-pointer shadow-lg group"
                         whileHover={{ scale: 1.1, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        <span className="text-xl group-hover:scale-110 transition-transform duration-300">🛒</span>
+                        <span className="text-lg md:text-xl group-hover:scale-110 transition-transform duration-300">🛒</span>
                         {(cartItems?.length || 0) > 0 && (
                             <motion.span 
-                                className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-2 py-1 text-xs font-bold shadow-lg"
+                                className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full px-1.5 py-0.5 text-xs font-bold shadow-lg min-w-[18px] h-[18px] flex items-center justify-center"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ type: "spring", stiffness: 500 }}
@@ -98,7 +98,7 @@ function Navbar() {
                             </motion.button>
                             <motion.button
                                 onClick={handleLogout}
-                                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm md:text-base hover:from-red-600 hover:to-red-700 transition-all duration-300 cursor-pointer shadow-lg font-medium"
+                                className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white px-5 py-2.5 rounded-xl text-sm md:text-base hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-300 cursor-pointer shadow-lg font-semibold border border-red-400/30 hover:border-red-300/50 hover:shadow-red-500/25 hover:shadow-xl backdrop-blur-sm"
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                             >
