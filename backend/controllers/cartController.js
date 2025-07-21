@@ -1,4 +1,4 @@
-const User = require("../models/user.js");
+const User = require("../models/User.js");
 const Food = require("../models/Food.js");
 const logger = require('../logger.js');
 
