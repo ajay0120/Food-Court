@@ -20,7 +20,8 @@ function LandingPage() {
 
   const fetchFeaturedItems = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/menu?limit=100");
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const res = await axios.get(`${baseURL}/api/menu?limit=100`);
       // Get 6 random items from the response
       const allItems = res.data.items;
       const shuffled = allItems.sort(() => 0.5 - Math.random());

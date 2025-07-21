@@ -1,7 +1,12 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:5000/api/cart";
+const getBaseURL = () => {
+  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  return `${baseURL}/api/cart`;
+};
+
+const BASE_URL = getBaseURL();
 
 export const fetchCartData = async (token) => {
   if (token) {

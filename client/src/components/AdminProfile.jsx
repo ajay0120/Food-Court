@@ -19,10 +19,11 @@ const AdminProfile = () => {
   const [cancelledOrders, setCancelledOrders] = useState([]);
 
   const token = localStorage.getItem("token");
+  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const fetchCurrentOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/orders/currentOrders", {
+      const res = await axios.get(`${baseURL}/api/orders/currentOrders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCurrentOrders(res.data);
@@ -33,7 +34,7 @@ const AdminProfile = () => {
 
   const fetchPastOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/orders/pastOrders", {
+      const res = await axios.get(`${baseURL}/api/orders/pastOrders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(res);
@@ -45,7 +46,7 @@ const AdminProfile = () => {
 
   const fetchCancelledOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/orders/cancelledOrders", {
+      const res = await axios.get(`${baseURL}/api/orders/cancelledOrders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Cancelled Orders", res);
@@ -64,7 +65,7 @@ const AdminProfile = () => {
   const markAsDelivered = async (orderId) => {
     try {
       await axios.post(
-        "http://localhost:5000/api/orders/markAsDelivered",
+        `${baseURL}/api/orders/markAsDelivered`,
         { orderId },
         {
           headers: { Authorization: `Bearer ${token}` },

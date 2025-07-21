@@ -70,7 +70,8 @@ function Menu() {
       });
       // console.log("the type is",type);
       // console.log("the category is",category);
-      const res = await axios.get(`http://localhost:5000/api/menu?${queryParams}`);
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const res = await axios.get(`${baseURL}/api/menu?${queryParams}`);
       // console.log(res.data.pagination);
       console.log(res.data.items);
       setMenu(res.data.items);

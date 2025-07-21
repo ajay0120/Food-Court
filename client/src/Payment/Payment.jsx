@@ -17,8 +17,9 @@ function Payment() {
   const fetchCartData = async () => {
     try {
       const token = localStorage.getItem("token");
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-      const res = await axios.get("http://localhost:5000/api/cart", {
+      const res = await axios.get(`${baseURL}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -52,9 +53,10 @@ function Payment() {
   const placeOrder = async (paymentMethod) => {
     try {
       const token = localStorage.getItem("token");
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       console.log("paymentMethod:", paymentMethod);
       const res = await axios.post(
-        "http://localhost:5000/api/orders",
+        `${baseURL}/api/orders`,
         {
           items: orderItems, // Use correctly formatted items
           total: totalAmount,
@@ -71,7 +73,7 @@ function Payment() {
       toast.success("Order placed successfully!");
 
       // Clear cart in backend
-      await fetch("http://localhost:5000/api/cart/clear", {
+      await fetch(`${baseURL}/api/cart/clear`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

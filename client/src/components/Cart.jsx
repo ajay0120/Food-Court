@@ -17,9 +17,11 @@ function Cart() {
   }, []);
 
   const fetchCartItems = async () => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+    
     if (token) {
       try {
-        const res = await axios.get("http://localhost:5000/api/cart", {
+        const res = await axios.get(`${baseURL}/api/cart`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const items = res.data.map((item) => ({
@@ -33,7 +35,7 @@ function Cart() {
       }
     } else {
       const localCart = JSON.parse(localStorage.getItem("cart")) || {};
-      const foodRes = await axios.get("http://localhost:5000/api/food");
+      const foodRes = await axios.get(`${baseURL}/api/food`);
       const items = foodRes.data
         .filter((item) => localCart[item._id])
         .map((item) => ({
@@ -54,6 +56,7 @@ function Cart() {
   };
 
   const updateQuantity = async (id, delta) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
     const existingItem = cartItems.find((item) => item._id === id);
     if (!existingItem) return;
     const newQty = existingItem.quantity + delta;
@@ -70,7 +73,7 @@ function Cart() {
           });
           console.log(token);
           await axios.delete(
-            `http://localhost:5000/api/cart/remove/${id}`,
+            `${baseURL}/api/cart/remove/${id}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
@@ -90,7 +93,7 @@ function Cart() {
       if (token) {
         try {
           await axios.put(
-            `http://localhost:5000/api/cart/update/${id}`,
+            `${baseURL}/api/cart/update/${id}`,
             { quantity: newQty },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -109,6 +112,8 @@ function Cart() {
   };
 
   const handlePlaceOrder = async () => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+    
     if (!token) {
       alert("Login to place an order.");
       return navigate("/login");
@@ -122,7 +127,7 @@ function Cart() {
         })),
       };
 
-      await axios.post("http://localhost:5000/api/order", orderData, {
+      await axios.post(`${baseURL}/api/order`, orderData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -131,7 +136,7 @@ function Cart() {
       setTotal(0);
 
       if (token) {
-        await axios.delete("http://localhost:5000/api/cart/clear", {
+        await axios.delete(`${baseURL}/api/cart/clear`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {

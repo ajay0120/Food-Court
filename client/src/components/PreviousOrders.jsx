@@ -10,11 +10,12 @@ const PreviousOrders = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Placed");
   const token = localStorage.getItem("token");
+  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/orders/myorders", {
+        const res = await axios.get(`${baseURL}/api/orders/myorders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -49,7 +50,7 @@ const PreviousOrders = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/orders/cancel/${orderId}`,
+        `${baseURL}/api/orders/cancel/${orderId}`,
         {},
         {
           headers: {

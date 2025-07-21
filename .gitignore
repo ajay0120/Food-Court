@@ -18,7 +18,8 @@ build/
 # Setup documentation files
 GOOGLE_OAUTH_SETUP.md
 ENVIRONMENT_SETUP.md
-
+DEPLOYMENT_GUIDE.md
+API_MIGRATION_SUMMARY.md
 # Logs
 logs/
 *.log
