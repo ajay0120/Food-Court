@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
-const User = require("../models/user");
+const User = require("../models/User");
 const Order = require("../models/order");
 
 router.get("/profile", protect, (req, res) => {
