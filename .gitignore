@@ -15,6 +15,10 @@ build/
 .env.test.local
 .env.production.local
 
+# Setup documentation files
+GOOGLE_OAUTH_SETUP.md
+ENVIRONMENT_SETUP.md
+
 # Logs
 logs/
 *.log
@@ -76,3 +80,4 @@ $RECYCLE.BIN/
 # Temporary files
 *.tmp
 *.temp
+

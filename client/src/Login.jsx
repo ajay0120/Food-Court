@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "./api/axios"; 
 import toast from "react-hot-toast";
+import GoogleLoginButton from "./components/GoogleLoginButton";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -106,6 +107,18 @@ const Login = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="flex items-center w-96 my-6">
+          <div className="flex-grow border-t border-gray-600"></div>
+          <span className="flex-shrink mx-4 text-gray-400">or</span>
+          <div className="flex-grow border-t border-gray-600"></div>
+        </div>
+
+        {/* Google Login */}
+        <div className="w-96">
+          <GoogleLoginButton />
+        </div>
 
         <p className="mt-4">
           Don't have an account?{" "}

@@ -1,12 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { User, Tag, Mail, BarChart3, Calendar, Package, CheckCircle } from "lucide-react";
 import Avatar from "react-avatar";
+import axios from "../api/axios";
 
 function PersonalInfo() {
   const username = localStorage.getItem("username");
   const email = localStorage.getItem("email");
   const name = localStorage.getItem("name");
+  
+  const [stats, setStats] = useState({
+    memberSince: "Loading...",
+    totalOrders: "...",
+    accountStatus: "Active"
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserStats();
+  }, []);
+
+  const fetchUserStats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("/users/stats", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setStats(response.data);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      // Fallback to default values
+      setStats({
+        memberSince: "Recently",
+        totalOrders: "0",
+        accountStatus: "Active"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex justify-center items-start py-8">
@@ -116,18 +150,22 @@ function PersonalInfo() {
               <div className="p-3 bg-gray-800/50 rounded-lg">
                 <Calendar size={20} className="mx-auto mb-2 text-blue-400" />
                 <p className="text-gray-400 text-sm">Member Since</p>
-                <p className="text-white font-semibold">January 2025</p>
+                <p className="text-white font-semibold">
+                  {loading ? "Loading..." : stats.memberSince}
+                </p>
               </div>
               <div className="p-3 bg-gray-800/50 rounded-lg">
                 <Package size={20} className="mx-auto mb-2 text-orange-400" />
                 <p className="text-gray-400 text-sm">Total Orders</p>
-                <p className="text-white font-semibold">12</p>
+                <p className="text-white font-semibold">
+                  {loading ? "..." : stats.totalOrders}
+                </p>
               </div>
               <div className="p-3 bg-gray-800/50 rounded-lg">
                 <CheckCircle size={20} className="mx-auto mb-2 text-green-400" />
                 <p className="text-gray-400 text-sm">Account Status</p>
                 <span className="inline-block bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
-                  Active
+                  {stats.accountStatus}
                 </span>
               </div>
             </div>

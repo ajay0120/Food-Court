@@ -19,13 +19,16 @@ import VerifyEmail from "./components/VerifyEmail";
 import TodayOffers from "./components/TodayOffers";
 import ContactUs from "./components/ContactUs";
 import AboutUs from "./components/AboutUs";
+import GoogleAuthWrapper from "./components/GoogleAuthWrapper";
+
 
 function App() {
   return (
-    <CartProvider> {/* ⬅️ Wrap everything inside */}
-      <Router>
-        <Toaster position="top-right" reverseOrder={false} />
-        <Routes>
+    <GoogleAuthWrapper>
+      <CartProvider> {/* ⬅️ Wrap everything inside */}
+        <Router>
+          <Toaster position="top-right" reverseOrder={false} />
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -74,6 +77,7 @@ function App() {
         <Footer/>
       </Router>
     </CartProvider>
+  </GoogleAuthWrapper>
   );
 }
 

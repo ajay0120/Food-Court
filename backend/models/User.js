@@ -18,7 +18,16 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function() { return !this.googleId; }, // Password not required for Google OAuth users
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows multiple documents without googleId
+    },
+    profilePicture: {
+      type: String,
+      default: null,
     },
     role: {
       type: String,

@@ -5,8 +5,11 @@ const OTP = require("../models/otp");
 const sendMail = require("../utils/sendMail");
 const logger = require('../logger.js');
 const resendOtp = require("../utils/reSendOpt.js");
+const { OAuth2Client } = require('google-auth-library');
 
 logger.info("authController loaded");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signup = async (req, res) => {
     logger.info("Signup endpoint called");
@@ -174,5 +177,87 @@ const verifyOtp = async (req, res) => {
     }
 };
 
+// Google OAuth Login
+const googleLogin = async (req, res) => {
+    logger.info("Google login endpoint called");
+    
+    try {
+        const { credential } = req.body;
+        
+        if (!credential) {
+            logger.warn("Google login attempt without credential");
+            return res.status(400).json({ message: "Google credential is required" });
+        }
 
-module.exports = { signup, login, sendOtp, verifyOtp };
+        // Verify the Google token
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name, picture, email_verified } = payload;
+
+        if (!email_verified) {
+            logger.warn(`Google login attempt with unverified email: ${email}`);
+            return res.status(400).json({ message: "Google email not verified" });
+        }
+
+        // Check if user exists
+        let user = await User.findOne({ email });
+
+        if (user) {
+            // User exists, update Google ID if not set
+            if (!user.googleId) {
+                user.googleId = googleId;
+                user.verified = true; // Google accounts are pre-verified
+                await user.save();
+                logger.info(`Updated existing user with Google ID: ${email}`);
+            }
+        } else {
+            // Create new user
+            const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+            
+            user = await User.create({
+                name,
+                username,
+                email,
+                googleId,
+                verified: true,
+                role: 'student',
+                profilePicture: picture
+            });
+            
+            logger.info(`Created new user via Google OAuth: ${email}`);
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id, role: user.role, email: user.email, username: user.username },
+            process.env.SECRET_KEY,
+            { expiresIn: "7d" }
+        );
+
+        logger.info(`Google login successful for: ${email}`);
+        
+        res.status(200).json({
+            message: "Google login successful",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture
+            }
+        });
+
+    } catch (error) {
+        logger.error(`Google login error: ${error.message}`);
+        res.status(500).json({ message: "Google authentication failed" });
+    }
+};
+
+
+module.exports = { signup, login, sendOtp, verifyOtp, googleLogin };
