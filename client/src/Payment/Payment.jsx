@@ -54,7 +54,7 @@ function Payment() {
     try {
       const token = localStorage.getItem("token");
       const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-      console.log("paymentMethod:", paymentMethod);
+      // console.log("paymentMethod:", paymentMethod);
       const res = await axios.post(
         `${baseURL}/api/orders`,
         {

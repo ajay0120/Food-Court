@@ -73,24 +73,24 @@ function Menu() {
       const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       const res = await axios.get(`${baseURL}/api/menu?${queryParams}`);
       // console.log(res.data.pagination);
-      console.log(res.data.items);
+      // console.log(res.data.items);
       setMenu(res.data.items);
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
-      console.log("Error fetching menu in frontend:", err.message);
+      // console.log("Error fetching menu in frontend:", err.message);
     }
   };
 
   const fetchCart = async () => {
     if (!token) {
-      console.log("User is not logged in.");
+      // console.log("User is not logged in.");
       return;
     }
     try {
       const cartData = await fetchCartData(token);
       setCart(cartData);
     } catch (err) {
-      console.log("Error fetching cart data:", err.message);
+      // console.log("Error fetching cart data:", err.message);
     }
   };
 

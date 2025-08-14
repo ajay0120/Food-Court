@@ -37,7 +37,7 @@ const AdminProfile = () => {
       const res = await axios.get(`${baseURL}/api/orders/pastOrders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(res);
+      // console.log(res);
       setPastOrders(res.data);
     } catch (error) {
       console.error("Error fetching past orders", error);
@@ -49,7 +49,7 @@ const AdminProfile = () => {
       const res = await axios.get(`${baseURL}/api/orders/cancelledOrders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Cancelled Orders", res);
+      // console.log("Cancelled Orders", res);
       setCancelledOrders(res.data);
     } catch (error) {
       console.error("Error fetching cancelled orders", error);
@@ -71,7 +71,7 @@ const AdminProfile = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Marked as delivered");
+      // console.log("Marked as delivered");
       await fetchCurrentOrders();
       await fetchPastOrders();
     } catch (error) {

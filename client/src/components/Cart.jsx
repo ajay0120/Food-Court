@@ -31,7 +31,7 @@ function Cart() {
         setCartItems(items);
         calculateTotal(items);
       } catch (err) {
-        console.log("Error fetching cart:", err.message);
+        // console.log("Error fetching cart:", err.message);
       }
     } else {
       const localCart = JSON.parse(localStorage.getItem("cart")) || {};
@@ -71,7 +71,7 @@ function Cart() {
             const newQty = existingItem.quantity + delta;
             return prevItems.filter(item => item._id !== id); 
           });
-          console.log(token);
+          // console.log(token);
           await axios.delete(
             `${baseURL}/api/cart/remove/${id}`,
             { headers: { Authorization: `Bearer ${token}` } }

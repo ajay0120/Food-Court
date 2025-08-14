@@ -36,11 +36,11 @@ const AdminMenu = () => {
           category: category === "all" ? undefined : category,
         },
       });
-      console.log(res.data.items);
+      // console.log(res.data.items);
       setMenu(res.data.items);
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
-      console.log("error fetching menu", err);
+      // console.log("error fetching menu", err);
       toast.error("Error fetching menu");
     }
   };
@@ -104,7 +104,7 @@ const AdminMenu = () => {
       inStock: form.inStock === "Yes" ? true : false,
     };
 
-    console.log("Payload being sent:", payload);
+    // console.log("Payload being sent:", payload);
 
     try {
       await axios.post("/menu", payload, {
@@ -114,9 +114,9 @@ const AdminMenu = () => {
       fetchMenu(currentPage, selectedCategory);
       resetForm();
     } catch (err) {
-      console.log("Full error object:", err);
-      console.log("Error response:", err.response?.data);
-      console.log("Error status:", err.response?.status);
+      // console.log("Full error object:", err);
+      // console.log("Error response:", err.response?.data);
+      // console.log("Error status:", err.response?.status);
       const errorMessage = err.response?.data?.message || 
                           err.response?.data?.error || 
                           "Error adding item. Please check all fields.";
@@ -180,9 +180,9 @@ const AdminMenu = () => {
       fetchMenu(currentPage, selectedCategory);
       resetForm();
     } catch (err) {
-      console.log("Full error object:", err);
-      console.log("Error response:", err.response?.data);
-      console.log("Error status:", err.response?.status);
+      // console.log("Full error object:", err);
+      // console.log("Error response:", err.response?.data);
+      // console.log("Error status:", err.response?.status);
       const errorMessage = err.response?.data?.message || 
                           err.response?.data?.error || 
                           "Error updating item. Please check all fields.";

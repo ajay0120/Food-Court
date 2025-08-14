@@ -25,7 +25,7 @@ function Navbar() {
     const refreshUserData = () => {
         const username = localStorage.getItem("username");
         const role = localStorage.getItem("role");
-        console.log("🔄 Refreshing user data - Username:", username, "Role:", role);
+        // console.log("🔄 Refreshing user data - Username:", username, "Role:", role);
         setUsername(username);
         setUserRole(role);
     };
@@ -42,33 +42,33 @@ function Navbar() {
         const currentRole = localStorage.getItem("role");
         const currentToken = localStorage.getItem("token");
 
-        console.log("=== Profile Navigation Debug ===");
-        console.log("Username:", currentUsername);
-        console.log("Role:", currentRole);
-        console.log("Token exists:", !!currentToken);
-        console.log("Token value:", currentToken?.substring(0, 20) + "...");
-        console.log("Current URL:", window.location.href);
+        // console.log("=== Profile Navigation Debug ===");
+        // console.log("Username:", currentUsername);
+        // console.log("Role:", currentRole);
+        // console.log("Token exists:", !!currentToken);
+        // console.log("Token value:", currentToken?.substring(0, 20) + "...");
+        // console.log("Current URL:", window.location.href);
 
         if (!currentUsername || !currentToken) {
-            console.log("❌ Missing username or token, redirecting to login");
+            // console.log("❌ Missing username or token, redirecting to login");
             alert("Please login first");
             navigate("/login");
             return;
         }
 
         if (currentRole?.toLowerCase() === "admin") {
-            console.log("✅ Admin user, navigating to /admin");
+            // console.log("✅ Admin user, navigating to /admin");
             navigate("/admin");
         } else {
-            console.log("✅ Regular user, navigating to /profile");
+            // console.log("✅ Regular user, navigating to /profile");
             navigate("/profile");
         }
-        console.log("=== Navigation attempt completed ===");
+        // console.log("=== Navigation attempt completed ===");
     };
 
     return (
         <div className="bg-gradient-to-r from-black via-gray-900 to-black text-white w-full shadow-2xl border-b border-gray-800">
-            {console.log("🎯 Navbar render - Username:", username, "UserRole:", userRole)}
+            {/* console.log("🎯 Navbar render - Username:", username, "UserRole:", userRole) */}
             <div className="w-full flex items-center justify-between px-4 md:px-10 py-6">
                 <div className="w-1/3 flex justify-start" />
 
@@ -110,7 +110,7 @@ function Navbar() {
                         <>
                             <motion.button
                                 onClick={(e) => {
-                                    console.log("🖱️ Avatar button clicked!");
+                                    // console.log("🖱️ Avatar button clicked!");
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handleProfileNavigation();
@@ -140,7 +140,7 @@ function Navbar() {
                     ) : (
                         <motion.button
                             onClick={(e) => {
-                                console.log("🖱️ Login button clicked!");
+                                // console.log("🖱️ Login button clicked!");
                                 e.preventDefault();
                                 e.stopPropagation();
                                 navigate("/login");
