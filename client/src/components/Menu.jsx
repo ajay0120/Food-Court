@@ -6,6 +6,7 @@ import { Plus, Minus, ShoppingCart, Utensils } from "lucide-react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import { fetchCartData, updateCartItem } from "../services/cartService";
+import { MenuItemSkeleton } from "./skeletons";
 
 // Custom styles for dropdown options
 const dropdownStyles = `
@@ -49,6 +50,8 @@ function Menu() {
   const [limit] = useState(20); // You can change limit as per your design
   const [totalPages, setTotalPages] = useState(1);
   const [type, setType] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCartLoading, setIsCartLoading] = useState(true);
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
   const navigate = useNavigate();
@@ -60,7 +63,14 @@ function Menu() {
   }, [page, search, category, type]);
 
   const fetchMenu = async () => {
+    let startTime; // Declare in function scope for catch block access
     try {
+      setIsLoading(true);
+      
+      // Start both the API call and minimum loading timer
+      startTime = Date.now();
+      const minLoadingTime = 800; // 800ms minimum loading time
+      
       const queryParams = new URLSearchParams({
         page,
         limit,
@@ -74,23 +84,68 @@ function Menu() {
       const res = await axios.get(`${baseURL}/api/menu?${queryParams}`);
       // console.log(res.data.pagination);
       // console.log(res.data.items);
+      
+      // Calculate elapsed time and remaining delay needed
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+      
+      // Wait for remaining time if API was too fast
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+      
       setMenu(res.data.items);
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
       // console.log("Error fetching menu in frontend:", err.message);
+      // Even on error, respect minimum loading time for consistent UX
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 800 - elapsedTime);
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchCart = async () => {
     if (!token) {
       // console.log("User is not logged in.");
+      setIsCartLoading(false);
       return;
     }
+    
+    let startTime; // Declare in function scope for catch block access
     try {
+      setIsCartLoading(true);
+      
+      // Start timer and API call
+      startTime = Date.now();
+      const minLoadingTime = 600; // 600ms minimum for cart (shorter than menu)
+      
       const cartData = await fetchCartData(token);
+      
+      // Calculate elapsed time and remaining delay needed
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+      
+      // Wait for remaining time if API was too fast
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+      
       setCart(cartData);
     } catch (err) {
       // console.log("Error fetching cart data:", err.message);
+      // Respect minimum loading time even on error
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 600 - elapsedTime);
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+    } finally {
+      setIsCartLoading(false);
     }
   };
 
@@ -254,7 +309,20 @@ function Menu() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          {menu.map((item, index) => {
+          {isLoading ? (
+            // Show skeleton while loading
+            Array.from({ length: 8 }).map((_, index) => (
+              <motion.div
+                key={`skeleton-${index}`}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <MenuItemSkeleton />
+              </motion.div>
+            ))
+          ) : (
+            menu.map((item, index) => {
             const isOutOfStock = item.inStock === false;
 
             return (
@@ -366,7 +434,8 @@ function Menu() {
                 </div>
               </motion.div>
             );
-          })}
+          })
+          )}
         </motion.div>
 
         {/* Pagination */}
