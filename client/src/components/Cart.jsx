@@ -4,10 +4,12 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import { CartItemSkeleton } from "./skeletons";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -19,8 +21,15 @@ function Cart() {
   const fetchCartItems = async () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
     
-    if (token) {
-      try {
+    let startTime; // Declare in function scope for catch block access
+    try {
+      setIsLoading(true);
+      
+      // Start timer for minimum loading time
+      startTime = Date.now();
+      const minLoadingTime = 700; // 700ms minimum loading time
+      
+      if (token) {
         const res = await axios.get(`${baseURL}/api/cart`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -28,22 +37,50 @@ function Cart() {
           ...item.product,
           quantity: item.quantity,
         }));
+        
+        // Calculate elapsed time and remaining delay needed
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        // Wait for remaining time if API was too fast
+        if (remainingTime > 0) {
+          await new Promise(resolve => setTimeout(resolve, remainingTime));
+        }
+        
         setCartItems(items);
         calculateTotal(items);
-      } catch (err) {
-        // console.log("Error fetching cart:", err.message);
+      } else {
+        const localCart = JSON.parse(localStorage.getItem("cart")) || {};
+        const foodRes = await axios.get(`${baseURL}/api/food`);
+        const items = foodRes.data
+          .filter((item) => localCart[item._id])
+          .map((item) => ({
+            ...item,
+            quantity: localCart[item._id],
+          }));
+        
+        // Calculate elapsed time and remaining delay needed  
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        // Wait for remaining time if API was too fast
+        if (remainingTime > 0) {
+          await new Promise(resolve => setTimeout(resolve, remainingTime));
+        }
+        
+        setCartItems(items);
+        calculateTotal(items);
       }
-    } else {
-      const localCart = JSON.parse(localStorage.getItem("cart")) || {};
-      const foodRes = await axios.get(`${baseURL}/api/food`);
-      const items = foodRes.data
-        .filter((item) => localCart[item._id])
-        .map((item) => ({
-          ...item,
-          quantity: localCart[item._id],
-        }));
-      setCartItems(items);
-      calculateTotal(items);
+    } catch (err) {
+      // console.log("Error fetching cart:", err.message);
+      // Respect minimum loading time even on error
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 700 - elapsedTime);
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -205,7 +242,20 @@ function Cart() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              {cartItems.map((item, index) => (
+              {isLoading ? (
+                // Show skeleton while loading
+                Array.from({ length: 3 }).map((_, index) => (
+                  <motion.div
+                    key={`cart-skeleton-${index}`}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <CartItemSkeleton />
+                  </motion.div>
+                ))
+              ) : (
+                cartItems.map((item, index) => (
                 <motion.div
                   key={item._id}
                   className="group relative bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 overflow-hidden"
@@ -285,7 +335,8 @@ function Cart() {
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              ))
+              )}
             </motion.div>
 
             {/* Total and Order Section */}
