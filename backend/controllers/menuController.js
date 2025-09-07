@@ -16,8 +16,13 @@ const getMenu = async (req, res) => {
       query.type = type;
     }
     // Filter by category if provided
-    if (category && category !== "All") {
-      query.category = category;
+    if (category && category !== "All" && category !== "all") {
+      // Handle multiple categories (comma-separated)
+      const categories = category.split(',').map(cat => cat.trim()).filter(cat => cat);
+      if (categories.length > 0) {
+        query.category = { $in: categories };
+        // console.log("category filter applied:", query.category);
+      }
     }
 
     // Search by name if provided
@@ -34,7 +39,7 @@ const getMenu = async (req, res) => {
     const items = await Food.find(query)
       .skip(skip)
       .limit(Number(limit))
-      .select("name price category img type inStock isDeleted");
+      .select("name price desc category img type inStock isDeleted");
     // console.log(items);
     // Count total items for pagination
     const totalItems = await Food.countDocuments(query);
@@ -69,7 +74,11 @@ const getDeletedMenuItems = async (req, res) => {
 
     // Filter by category if provided
     if (category && category !== "All") {
-      query.category = category;
+      // Handle multiple categories (comma-separated)
+      const categories = category.split(',').map(cat => cat.trim()).filter(cat => cat);
+      if (categories.length > 0) {
+        query.category = { $in: categories };
+      }
     }
 
     // Search by name if provided

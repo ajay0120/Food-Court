@@ -2,11 +2,12 @@ import { Toaster } from 'react-hot-toast';
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Minus, ShoppingCart, Utensils } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Utensils, ChevronDown } from "lucide-react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import { fetchCartData, updateCartItem } from "../services/cartService";
 import { MenuItemSkeleton } from "./skeletons";
+import { FOOD_TYPES, FOOD_CATEGORIES } from "../../../common/foodEnums";
 
 // Custom styles for dropdown options
 const dropdownStyles = `
@@ -44,7 +45,7 @@ const dropdownStyles = `
 function Menu() {
   const [menu, setMenu] = useState([]);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [cart, setCart] = useState({});
   const [page, setPage] = useState(1);
   const [limit] = useState(20); // You can change limit as per your design
@@ -52,6 +53,13 @@ function Menu() {
   const [type, setType] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isCartLoading, setIsCartLoading] = useState(true);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  
+  // Applied filter states (what's actually being used for API calls)
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [appliedCategories, setAppliedCategories] = useState([]);
+  const [appliedType, setAppliedType] = useState("");
+  
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
   const navigate = useNavigate();
@@ -60,7 +68,47 @@ function Menu() {
   useEffect(() => {
     fetchMenu();
     fetchCart();
-  }, [page, search, category, type]);
+  }, [page, appliedSearch, appliedCategories, appliedType]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.category-dropdown')) {
+        setCategoryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const applyFilters = () => {
+    setAppliedSearch(search);
+    setAppliedCategories(selectedCategories);
+    setAppliedType(type);
+    setPage(1); // Reset to first page when applying new filters
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setSelectedCategories([]);
+    setType("");
+    setAppliedSearch("");
+    setAppliedCategories([]);
+    setAppliedType("");
+    setPage(1);
+  };
+
+  const handleCategoryToggle = (category) => {
+    setSelectedCategories(prev => {
+      const newCategories = prev.includes(category) 
+        ? prev.filter(cat => cat !== category)
+        : [...prev, category];
+      return newCategories;
+    });
+  };
 
   const fetchMenu = async () => {
     let startTime; // Declare in function scope for catch block access
@@ -74,16 +122,12 @@ function Menu() {
       const queryParams = new URLSearchParams({
         page,
         limit,
-        search: search.trim(),
-        type: type || "",
-        category: category || "",
+        search: appliedSearch.trim(),
+        type: appliedType || "",
+        category: appliedCategories.join(',') || "",
       });
-      // console.log("the type is",type);
-      // console.log("the category is",category);
       const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       const res = await axios.get(`${baseURL}/api/menu?${queryParams}`);
-      // console.log(res.data.pagination);
-      // console.log(res.data.items);
       
       // Calculate elapsed time and remaining delay needed
       const elapsedTime = Date.now() - startTime;
@@ -95,9 +139,7 @@ function Menu() {
       }
       
       setMenu(res.data.items);
-      setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
-      // console.log("Error fetching menu in frontend:", err.message);
       // Even on error, respect minimum loading time for consistent UX
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(0, 800 - elapsedTime);
@@ -111,7 +153,6 @@ function Menu() {
 
   const fetchCart = async () => {
     if (!token) {
-      // console.log("User is not logged in.");
       setIsCartLoading(false);
       return;
     }
@@ -137,7 +178,6 @@ function Menu() {
       
       setCart(cartData);
     } catch (err) {
-      // console.log("Error fetching cart data:", err.message);
       // Respect minimum loading time even on error
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(0, 600 - elapsedTime);
@@ -165,22 +205,6 @@ function Menu() {
     const newQty = (cart[id] || 0) + delta;
     updateCart(id, newQty < 0 ? 0 : newQty);
   };
-
-  const categorySet = new Set();
-
-  menu.forEach((item) => {
-    const categories = Array.isArray(item.category)
-      ? item.category
-      : [item.category]; // wrap string in array
-
-    categories.forEach((cat) => {
-      if (typeof cat === "string" && cat.trim()) {
-        categorySet.add(cat.trim());
-      }
-    });
-  });
-
-  const uniqueCategories = Array.from(categorySet);
 
 
   return (
@@ -254,9 +278,12 @@ function Menu() {
               }}
               whileHover={{ scale: 1.02 }}
             >
-              <option value="" className="bg-gray-800 text-gray-400 py-2">Type</option>
-              <option value="veg" className="bg-gray-800 text-green-400 py-2 hover:bg-gray-700">🟢 Vegetarian</option>
-              <option value="non-veg" className="bg-gray-800 text-red-400 py-2 hover:bg-gray-700">🔴 Non-Vegetarian</option>
+              <option value="" className="bg-gray-800 text-gray-400 py-2">All Types</option>
+              {FOOD_TYPES.map((foodType) => (
+                <option key={foodType} value={foodType} className="bg-gray-800 text-white py-2 hover:bg-gray-700 capitalize">
+                  {foodType === 'veg' ? '🟢 Vegetarian' : '🔴 Non-Vegetarian'}
+                </option>
+              ))}
             </motion.select>
             
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -267,32 +294,107 @@ function Menu() {
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
           
-          <div className="relative w-full lg:w-1/5">
-            <motion.select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-gray-800/80 backdrop-blur-sm text-white border border-gray-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300 cursor-pointer appearance-none custom-select"
-              style={{
-                backgroundImage: 'none'
-              }}
+          {/* Categories Multi-select Dropdown */}
+          <div className="relative w-full lg:w-1/5 category-dropdown">
+            <motion.div
+              className="w-full px-6 py-4 rounded-2xl bg-gray-800/80 backdrop-blur-sm text-white border border-gray-600 focus:border-orange-500 transition-all duration-300 cursor-pointer"
+              onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
               whileHover={{ scale: 1.02 }}
             >
-              <option value="" className="bg-gray-800 text-gray-400 py-2">Categories</option>
-              {uniqueCategories.map((cat, index) => (
-                <option key={`${cat}-${index}`} value={cat} className="bg-gray-800 text-white py-2 hover:bg-gray-700 capitalize">
-                  <Utensils size={20} className="mr-2" />
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </option>
-              ))}
-            </motion.select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </div>
+              <div className="flex items-center justify-between">
+                <span className={selectedCategories.length === 0 ? "text-gray-400" : "text-white"}>
+                  {selectedCategories.length === 0 
+                    ? "Categories" 
+                    : selectedCategories.length === 1 
+                    ? selectedCategories[0]
+                    : `${selectedCategories.length} selected`
+                  }
+                </span>
+                <ChevronDown 
+                  className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+                    categoryDropdownOpen ? 'rotate-180' : ''
+                  }`} 
+                />
+              </div>
+            </motion.div>
+            
+            {/* Dropdown Content */}
+            {categoryDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto"
+              >
+                <div className="p-2">
+                  {FOOD_CATEGORIES.map((category) => (
+                    <motion.label
+                      key={category}
+                      className="flex items-center p-3 hover:bg-gray-700/50 rounded-xl cursor-pointer transition-colors duration-200"
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => handleCategoryToggle(category)}
+                        className="w-4 h-4 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500 focus:ring-2 mr-3"
+                      />
+                      <span className="text-white capitalize flex items-center">
+                        <Utensils size={16} className="mr-2 text-gray-400" />
+                        {category}
+                      </span>
+                    </motion.label>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+            
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
+
+          {/* Filter Action Buttons */}
+          <div className="flex gap-3 w-full lg:w-auto">
+            <motion.button
+              onClick={applyFilters}
+              className="flex-1 lg:flex-none bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 cursor-pointer shadow-lg flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Apply
+            </motion.button>
+            
+            <motion.button
+              onClick={clearFilters}
+              className="flex-1 lg:flex-none bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 cursor-pointer shadow-lg flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Clear
+            </motion.button>
+          </div>
         </motion.div>
+
+        {/* Filters applied */}
+        {(appliedSearch || appliedCategories.length > 0 || appliedType) && (
+          <motion.div 
+            className="max-w-6xl mx-auto mb-6 p-4 bg-gray-800/50 rounded-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p className="text-sm text-gray-400">
+              <strong>Applied Filters:</strong> 
+              {appliedSearch && ` Search: "${appliedSearch}"`}
+              {appliedType && ` | Type: ${appliedType}`}
+              {appliedCategories.length > 0 && ` | Categories: ${appliedCategories.join(', ')}`}
+            </p>
+          </motion.div>
+        )}
 
         {/* Menu Grid */}
         <motion.div 
@@ -328,7 +430,7 @@ function Menu() {
             return (
               <motion.div
                 key={item._id}
-                className={`group relative bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 overflow-hidden ${
+                className={`group relative bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 overflow-hidden flex flex-col ${
                   isOutOfStock ? 'opacity-60' : 'hover:scale-105'
                 }`}
                 initial={{ opacity: 0, y: 50 }}
@@ -336,7 +438,6 @@ function Menu() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={!isOutOfStock ? { y: -8 } : {}}
               >
-                {/* Background gradient effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 
                 {/* Stock indicator */}
@@ -344,7 +445,7 @@ function Menu() {
                   <div className={`w-3 h-3 rounded-full ${item.inStock ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
                   <div className="relative mb-4 group-hover:scale-110 transition-transform duration-300">
                     <img
                       src={item.img}
@@ -371,8 +472,10 @@ function Menu() {
                     {item.name}
                   </h3>
                   
-                  <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed px-2">
-                    {item.desc}
+                  <p className="text-gray-400 text-sm mb-3 leading-relaxed px-2 flex-grow overflow-hidden">
+                    <span className="line-clamp-3">
+                      {item.desc}
+                    </span>
                   </p>
                   
                   <div className="mb-4">
@@ -387,8 +490,17 @@ function Menu() {
                     )}
                   </div>
 
-                  {/* Cart Controls */}
-                  <div className="w-full">
+                  {/* Categories Display */}
+                  <div className="mb-3 flex flex-wrap gap-1 justify-center">
+                    {item.category && item.category.length > 0 && item.category.map((cat, i) => (
+                      <span key={i} className="bg-gray-700/50 text-xs px-2 py-1 rounded-full text-gray-300 border border-gray-600">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Cart Controls - Fixed at bottom */}
+                  <div className="w-full mt-auto">
                     {!isOutOfStock ? (
                       cart[item._id] ? (
                         <div className="flex items-center justify-center gap-3 bg-gray-700/50 rounded-2xl p-2.5">
