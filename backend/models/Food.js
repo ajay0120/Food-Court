@@ -13,12 +13,15 @@ const FoodSchema = new mongoose.Schema(
     },
     img: {
       type: String,
-      validate: {
-        validator: function (value) {
-          return /^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i.test(value);
-        },
-        message: "Invalid image URL format",
-      },
+      // Image URL validation is temporarily disabled due to issues with external image sources.
+      // TODO: Re-enable and adjust the image URL validator once external image source issues are resolved or a reliable image hosting solution is implemented.
+      // Uncomment and adjust the validator if strict image URL validation is needed.
+      // validate: {
+      //   validator: function (value) {
+      //     return /^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i.test(value);
+      //   },
+      //   message: "Invalid image URL format",
+      // },
       default: "https://placeholder.com/food-image",
     },
     price: {
@@ -53,6 +56,10 @@ const FoodSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
