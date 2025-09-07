@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
@@ -7,6 +7,7 @@ import { FOOD_TYPES, FOOD_CATEGORIES } from "../../../common/foodEnums";
 
 const AdminMenu = () => {
   const [menu, setMenu] = useState([]);
+  const [deletedItems, setDeletedItems] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [form, setForm] = useState({
     name: "",
@@ -23,9 +24,28 @@ const AdminMenu = () => {
 
   const [isEdit, setIsEdit] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [showDeletedItems, setShowDeletedItems] = useState(false);
 
   const itemsPerPage = 10;
   const token = localStorage.getItem("token");
+
+  const fetchDeletedItems = async (page = 1, category = "all") => {
+    try {
+      const res = await axios.get("/menu/deleted", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          page,
+          limit: itemsPerPage,
+          category: category === "all" ? undefined : category,
+        },
+      });
+      setDeletedItems(res.data.items);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (err) {
+      // console.log("error fetching deleted items", err);
+      toast.error("Error fetching deleted items");
+    }
+  };
 
   const fetchMenu = async (page = 1, category = "all") => {
     try {
@@ -53,7 +73,11 @@ const AdminMenu = () => {
   const handleCategoryFilter = (cat) => {
     setSelectedCategory(cat);
     setCurrentPage(1);
-    fetchMenu(1, cat);
+    if (showDeletedItems) {
+      fetchDeletedItems(1, cat);
+    } else {
+      fetchMenu(1, cat);
+    }
   };
 
   const handleAdd = async () => {
@@ -190,16 +214,44 @@ const AdminMenu = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
+  const handlePermanentDelete = async (id) => {
+    if (window.confirm("Are you sure you want to permanently delete this item?")) {
       try {
         await axios.delete(`/menu/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Item deleted!");
+        fetchDeletedItems(currentPage, selectedCategory);
+      } catch (err) {
+        toast.error("Error deleting item");
+      }
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      try {
+        await axios.patch(`/menu/${id}`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success("Item moved to deleted items!");
         fetchMenu(currentPage, selectedCategory);
       } catch (err) {
         toast.error("Error deleting item");
+      }
+    }
+  };
+
+  const handleRestore = async (id) => {
+    if (window.confirm("Are you sure you want to restore this item?")) {
+      try {
+        await axios.patch(`/menu/${id}/restore`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success("Item restored successfully!");
+        fetchDeletedItems(currentPage, selectedCategory);
+      } catch (err) {
+        toast.error("Error restoring item");
       }
     }
   };
@@ -238,14 +290,16 @@ const AdminMenu = () => {
     setModalOpen(true);
   };
 
+  const fetchMenuData = useCallback((page = currentPage, category = selectedCategory) => {
+    if (showDeletedItems) {
+      fetchDeletedItems(page, category);
+    } else {
+      fetchMenu(page, category);
+    }
+  }, [showDeletedItems, currentPage, selectedCategory, fetchDeletedItems, fetchMenu]);
   useEffect(() => {
-    fetchMenu(currentPage, selectedCategory);
-  }, []);
-
-  // Update currentPage setter to fetch new page when changed
-  useEffect(() => {
-    fetchMenu(currentPage, selectedCategory);
-  }, [currentPage, selectedCategory]);
+    fetchMenuData();
+  }, [currentPage, selectedCategory, showDeletedItems, fetchMenuData]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative overflow-hidden">
@@ -268,13 +322,53 @@ const AdminMenu = () => {
           Admin Menu Panel
         </motion.h2>
 
-        {/* Category Filter */}
-        <motion.div 
-          className="flex flex-wrap gap-3 justify-center mb-8"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        {/* Toggle Buttons for Active Menu and Deleted Items */}
+        <div className="flex justify-between items-center mb-12">
+          <h1 className="text-5xl font-extrabold text-white tracking-wider">
+            {showDeletedItems ? "Deleted Menu" : "Manage Menu"}
+          </h1>
+          <div className="flex items-center gap-4">
+            <motion.button
+              onClick={() => {
+                if (showDeletedItems) {
+                  setShowDeletedItems(false);
+                  fetchMenu(1, selectedCategory);
+                  setCurrentPage(1);
+                }
+              }}
+              className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 ${
+                !showDeletedItems
+                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+              whileHover={{ scale: !showDeletedItems ? 1.05 : 1.02 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Active Menu
+            </motion.button>
+            <motion.button
+              onClick={() => {
+                if (!showDeletedItems) {
+                  setShowDeletedItems(true);
+                  fetchDeletedItems(1, selectedCategory);
+                  setCurrentPage(1);
+                }
+              }}
+              className={`px-6 py-2 rounded-full font-semibold transition-colors duration-300 ${
+                showDeletedItems
+                  ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+              whileHover={{ scale: showDeletedItems ? 1.05 : 1.02 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Deleted Items
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex justify-center gap-4 mb-12">
           {uniqueCategories.map((cat, index) => (
             <motion.button
               key={cat}
@@ -293,7 +387,7 @@ const AdminMenu = () => {
               {cat}
             </motion.button>
           ))}
-        </motion.div>
+        </div>
 
         {/* Add Button */}
         <motion.div 
@@ -323,7 +417,8 @@ const AdminMenu = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          {menu.map((item, index) => (
+          
+          {!showDeletedItems && menu.map((item, index) => (
             <motion.div 
               key={item._id} 
               className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden"
@@ -405,8 +500,85 @@ const AdminMenu = () => {
               </div>
             </motion.div>
           ))}
+          {showDeletedItems && deletedItems.map((item, index) => (
+            <motion.div 
+              key={item._id}
+              className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ scale: 1.03, y: -5 }}
+            >
+              {/* Background gradient effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="relative mb-4 group-hover:scale-105 transition-transform duration-300">
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    className="w-32 h-32 object-cover rounded-xl shadow-lg"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-300 transition-colors duration-300">
+                  {item.name}
+                </h3>
+                
+                <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
+                  {item.desc}
+                </p>
+                
+                <div className="mb-3">
+                  <span className="text-2xl font-bold text-orange-400">₹{item.price.org}</span>
+                  {item.price.mrp > item.price.org && (
+                    <>
+                      <span className="line-through text-sm text-gray-500 ml-2">₹{item.price.mrp}</span>
+                      <span className="text-green-400 text-sm font-semibold ml-2">({item.price.off}% off)</span>
+                    </>
+                  )}
+                </div>
+                
+                <div className="mb-3 flex flex-wrap gap-1 justify-center">
+                  {item.category.map((cat, i) => (
+                    <span key={i} className="bg-gray-700 text-xs px-2 py-1 rounded-full text-gray-300">
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+                
+                <div className="mb-4">
+                  <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                    item.inStock 
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  }`}>
+                    {item.inStock ? "In Stock" : "Out of Stock"}
+                  </span>
+                </div>
+                
+                <div className="flex gap-3 w-full">
+                  <motion.button
+                    onClick={() => handleRestore(item._id)}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 cursor-pointer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Restore
+                  </motion.button>
+                  <motion.button
+                    onClick={() => handlePermanentDelete(item._id)}
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 cursor-pointer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Delete
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
-
         {/* Pagination */}
         <motion.div 
           className="flex justify-center items-center mt-12 gap-4"
@@ -441,7 +613,6 @@ const AdminMenu = () => {
           </motion.button>
         </motion.div>
       </div>
-
       {/* Enhanced Modal */}
       {modalOpen && (
         <motion.div 
