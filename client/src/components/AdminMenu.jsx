@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
@@ -6,6 +7,7 @@ import Navbar from "./Navbar";
 import { FOOD_TYPES, FOOD_CATEGORIES } from "../../../common/foodEnums";
 
 const AdminMenu = () => {
+  const navigate = useNavigate();
   const [menu, setMenu] = useState([]);
   const [deletedItems, setDeletedItems] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -29,7 +31,7 @@ const AdminMenu = () => {
   const itemsPerPage = 10;
   const token = localStorage.getItem("token");
 
-  const fetchDeletedItems = async (page = 1, category = "all") => {
+  const fetchDeletedItems = useCallback(async (page = 1, category = "all") => {
     try {
       const res = await axios.get("/menu/deleted", {
         headers: { Authorization: `Bearer ${token}` },
@@ -45,9 +47,9 @@ const AdminMenu = () => {
       // console.log("error fetching deleted items", err);
       toast.error("Error fetching deleted items");
     }
-  };
+  }, [token, itemsPerPage]);
 
-  const fetchMenu = async (page = 1, category = "all") => {
+  const fetchMenu = useCallback(async (page = 1, category = "all") => {
     try {
       const res = await axios.get("/menu", {
         params: {
@@ -63,7 +65,7 @@ const AdminMenu = () => {
       // console.log("error fetching menu", err);
       toast.error("Error fetching menu");
     }
-  };
+  }, [itemsPerPage]);
 
   const uniqueCategories = [
     "all",
@@ -273,15 +275,15 @@ const AdminMenu = () => {
 
   const openEditModal = (item) => {
     setForm({
-      name: item.name,
-      desc: item.desc,
-      img: item.img,
+      name: item.name || "",
+      desc: item.desc || "", 
+      img: item.img || "",
       price: {
-        org: item.price.org,
-        mrp: item.price.mrp,
-        off: item.price.off
+        org: item.price?.org || "",
+        mrp: item.price?.mrp || "",
+        off: item.price?.off || 0
       },
-      type: item.type,
+      type: item.type || "",
       category: Array.isArray(item.category) ? item.category : [],
       inStock: item.inStock ? "Yes" : "No",
     });
@@ -297,9 +299,10 @@ const AdminMenu = () => {
       fetchMenu(page, category);
     }
   }, [showDeletedItems, currentPage, selectedCategory, fetchDeletedItems, fetchMenu]);
+  
   useEffect(() => {
     fetchMenuData();
-  }, [currentPage, selectedCategory, showDeletedItems, fetchMenuData]);
+  }, [fetchMenuData]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative overflow-hidden">
@@ -328,6 +331,17 @@ const AdminMenu = () => {
             {showDeletedItems ? "Deleted Menu" : "Manage Menu"}
           </h1>
           <div className="flex items-center gap-4">
+            <motion.button
+              onClick={() => navigate('/menu')}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-2 rounded-full font-semibold transition-all duration-300 shadow-lg flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Go to Menu
+            </motion.button>
             <motion.button
               onClick={() => {
                 if (showDeletedItems) {
@@ -421,7 +435,7 @@ const AdminMenu = () => {
           {!showDeletedItems && menu.map((item, index) => (
             <motion.div 
               key={item._id} 
-              className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden"
+              className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden min-h-[440px] flex flex-col justify-between"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -433,7 +447,7 @@ const AdminMenu = () => {
               {/* Stock indicator */}
               <div className={`absolute top-4 right-4 w-3 h-3 rounded-full ${item.inStock ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
               
-              <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="relative z-10 flex flex-col items-center text-center h-full">
                 <div className="relative mb-4 group-hover:scale-105 transition-transform duration-300">
                   <img
                     src={item.img}
@@ -447,8 +461,10 @@ const AdminMenu = () => {
                   {item.name}
                 </h3>
                 
-                <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
-                  {item.desc}
+                <p className="text-gray-400 text-sm mb-3 leading-relaxed flex-grow overflow-hidden">
+                  <span className="line-clamp-3">
+                    {item.desc}
+                  </span>
                 </p>
                 
                 <div className="mb-3">
@@ -479,7 +495,7 @@ const AdminMenu = () => {
                   </span>
                 </div>
                 
-                <div className="flex gap-3 w-full">
+                <div className="flex gap-3 w-full mt-auto">
                   <motion.button
                     onClick={() => openEditModal(item)}
                     className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 cursor-pointer"
@@ -503,7 +519,7 @@ const AdminMenu = () => {
           {showDeletedItems && deletedItems.map((item, index) => (
             <motion.div 
               key={item._id}
-              className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden"
+              className="group bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl shadow-2xl border border-gray-700 hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden h-[440px]"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -511,7 +527,7 @@ const AdminMenu = () => {
             >
               {/* Background gradient effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="relative z-10 flex flex-col items-center text-center h-full">
                 <div className="relative mb-4 group-hover:scale-105 transition-transform duration-300">
                   <img
                     src={item.img}
@@ -525,8 +541,10 @@ const AdminMenu = () => {
                   {item.name}
                 </h3>
                 
-                <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
-                  {item.desc}
+                <p className="text-gray-400 text-sm mb-3 leading-relaxed flex-grow overflow-hidden">
+                  <span className="line-clamp-3">
+                    {item.desc}
+                  </span>
                 </p>
                 
                 <div className="mb-3">
@@ -557,7 +575,7 @@ const AdminMenu = () => {
                   </span>
                 </div>
                 
-                <div className="flex gap-3 w-full">
+                <div className="flex gap-3 w-full mt-auto">
                   <motion.button
                     onClick={() => handleRestore(item._id)}
                     className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 cursor-pointer"

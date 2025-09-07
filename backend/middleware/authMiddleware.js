@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 const protect = async (req, res, next) => {
   let token = req.headers.authorization?.split(" ")[1];
-  console.log("is token invalid "+(!token));
+  // console.log("is token invalid "+(token));
   // console.log(token);
   if (!token) return res.status(401).json({ message: "Not authorized, no token" });
   try {
