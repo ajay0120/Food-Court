@@ -7,7 +7,17 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL, 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, 
+  optionsSuccessStatus: 200,
+  // maxAge specifies how long (in seconds) the results of a preflight request can be cached; set to 600 for 10 minutes to reduce preflight requests.
+  maxAge: 600,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Health check endpoint
