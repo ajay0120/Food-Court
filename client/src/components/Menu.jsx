@@ -1,6 +1,6 @@
 import { Toaster } from 'react-hot-toast';
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Minus, ShoppingCart, Utensils, ChevronDown } from "lucide-react";
 import axios from "axios";
@@ -44,21 +44,25 @@ const dropdownStyles = `
 
 function Menu() {
   const [menu, setMenu] = useState([]);
-  const [search, setSearch] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Input states
+  const [search, setSearch] = useState(searchParams.get('search') || "");
+  const [selectedCategories, setSelectedCategories] = useState(searchParams.get('category')?.split(',') || []);
+  const [type, setType] = useState(searchParams.get('type') || "");
+  
   const [cart, setCart] = useState({});
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20); // You can change limit as per your design
+  const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
+  const [limit, setLimit] = useState(Number(searchParams.get('limit')) || 20);
   const [totalPages, setTotalPages] = useState(1);
-  const [type, setType] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isCartLoading, setIsCartLoading] = useState(true);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   
   // Applied filter states (what's actually being used for API calls)
-  const [appliedSearch, setAppliedSearch] = useState("");
-  const [appliedCategories, setAppliedCategories] = useState([]);
-  const [appliedType, setAppliedType] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState(searchParams.get('search') || "");
+  const [appliedCategories, setAppliedCategories] = useState(searchParams.get('category')?.split(',') || []);
+  const [appliedType, setAppliedType] = useState(searchParams.get('type') || "");
   
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
@@ -66,9 +70,24 @@ function Menu() {
 
   // Fetch menu and cart on mount
   useEffect(() => {
-    fetchMenu();
+    // Update state from URL on initial load or when URL changes
+    const searchFromUrl = searchParams.get('search') || "";
+    const categoriesFromUrl = searchParams.get('category')?.split(',').filter(Boolean) || [];
+    const typeFromUrl = searchParams.get('type') || "";
+    const pageFromUrl = Number(searchParams.get('page')) || 1;
+
+    setAppliedSearch(searchFromUrl);
+    setAppliedCategories(categoriesFromUrl);
+    setAppliedType(typeFromUrl);
+    setPage(pageFromUrl);
+    
+    setSearch(searchFromUrl);
+    setSelectedCategories(categoriesFromUrl);
+    setType(typeFromUrl);
+
+    fetchMenu(pageFromUrl, searchFromUrl, categoriesFromUrl, typeFromUrl);
     fetchCart();
-  }, [page, appliedSearch, appliedCategories, appliedType]);
+  }, [searchParams]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -84,21 +103,35 @@ function Menu() {
     };
   }, []);
 
+  const updateUrlParams = (newParams) => {
+    const currentParams = new URLSearchParams(searchParams);
+    
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value) {
+        currentParams.set(key, value);
+      } else {
+        currentParams.delete(key);
+      }
+    });
+    
+    setSearchParams(currentParams);
+  };
+
   const applyFilters = () => {
-    setAppliedSearch(search);
-    setAppliedCategories(selectedCategories);
-    setAppliedType(type);
-    setPage(1); // Reset to first page when applying new filters
+    updateUrlParams({
+      search: search,
+      limit: limit,
+      category: selectedCategories.join(','),
+      type: type,
+      page: 1, // Reset page on new filter application
+    });
   };
 
   const clearFilters = () => {
     setSearch("");
     setSelectedCategories([]);
     setType("");
-    setAppliedSearch("");
-    setAppliedCategories([]);
-    setAppliedType("");
-    setPage(1);
+    setSearchParams({});
   };
 
   const handleCategoryToggle = (category) => {
@@ -110,7 +143,7 @@ function Menu() {
     });
   };
 
-  const fetchMenu = async () => {
+  const fetchMenu = async (currentPage, currentSearch, currentCategories, currentType) => {
     let startTime; // Declare in function scope for catch block access
     try {
       setIsLoading(true);
@@ -120,11 +153,11 @@ function Menu() {
       const minLoadingTime = 800; // 800ms minimum loading time
       
       const queryParams = new URLSearchParams({
-        page,
-        limit,
-        search: appliedSearch.trim(),
-        type: appliedType || "",
-        category: appliedCategories.join(',') || "",
+        page: currentPage,
+        limit: limit,
+        search: currentSearch.trim(),
+        type: currentType || "",
+        category: currentCategories.join(',') || "",
       });
       const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       const res = await axios.get(`${baseURL}/api/menu?${queryParams}`);
@@ -139,6 +172,7 @@ function Menu() {
       }
       
       setMenu(res.data.items);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
       // Even on error, respect minimum loading time for consistent UX
       const elapsedTime = Date.now() - startTime;
@@ -558,7 +592,7 @@ function Menu() {
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           <motion.button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => updateUrlParams({ page: page - 1 })}
             disabled={page === 1}
             className="bg-gradient-to-r from-orange-500 to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white px-5 py-2.5 rounded-xl font-medium disabled:opacity-50 transition-all duration-300 cursor-pointer shadow-lg text-sm"
             whileHover={{ scale: page === 1 ? 1 : 1.05, y: page === 1 ? 0 : -2 }}
@@ -574,7 +608,7 @@ function Menu() {
           </div>
           
           <motion.button
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() => updateUrlParams({ page: page + 1 })}
             disabled={page === totalPages}
             className="bg-gradient-to-r from-orange-500 to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white px-5 py-2.5 rounded-xl font-medium disabled:opacity-50 transition-all duration-300 cursor-pointer shadow-lg text-sm"
             whileHover={{ scale: page === totalPages ? 1 : 1.05, y: page === totalPages ? 0 : -2 }}
