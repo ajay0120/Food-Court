@@ -5,10 +5,9 @@ import Avatar from "react-avatar";
 import axios from "../api/axios";
 
 function PersonalInfo() {
-  const username = localStorage.getItem("username");
-  const email = localStorage.getItem("email");
-  const name = localStorage.getItem("name");
-  
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [stats, setStats] = useState({
     memberSince: "Loading...",
     totalOrders: "...",
@@ -18,20 +17,30 @@ function PersonalInfo() {
 
   useEffect(() => {
     fetchUserStats();
+    fetchProfile();
   }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const { data } = await axios.get("/users/profile");
+      setUser(data);
+    } catch (error) {
+      console.error("Failed to fetch profile", error);
+      // Optional: handle error, e.g., redirect to login if unauthorized
+      if (error.response?.status === 401) {
+        handleLogout();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchUserStats = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("/users/stats", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axios.get("/users/stats");
       setStats(response.data);
     } catch (error) {
       console.error("Error fetching user stats:", error);
-      // Fallback to default values
       setStats({
         memberSince: "Recently",
         totalOrders: "0",
@@ -42,9 +51,24 @@ function PersonalInfo() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  // Render a loading state
+  if (isLoading) {
+    return <div>Loading profile...</div>;
+  }
+
+  // Render if user data failed to load
+  if (!user) {
+    return <div>Could not load profile. Please try logging in again.</div>;
+  }
+
   return (
     <div className="flex justify-center items-start py-8">
-      <motion.div 
+      <motion.div
         className="bg-gray-800/80 backdrop-blur-sm border border-gray-700 shadow-2xl rounded-2xl overflow-hidden w-full max-w-4xl"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -55,7 +79,7 @@ function PersonalInfo() {
           <div className="flex items-center space-x-4">
             <Avatar
               color={Avatar.getRandomColor("sitebase", ["blue"])}
-              name={username}
+              name={user.username}
               size="70"
               round={true}
             />
@@ -69,7 +93,7 @@ function PersonalInfo() {
         {/* Content */}
         <div className="px-8 py-8">
           {/* User Summary */}
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-6 mb-8 p-4 bg-gray-700/30 rounded-xl"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -77,21 +101,21 @@ function PersonalInfo() {
           >
             <Avatar
               color={Avatar.getRandomColor("sitebase", ["blue"])}
-              name={username}
+              name={user.username}
               size="80"
               round={true}
             />
             <div>
-              <h2 className="text-2xl font-semibold text-white">{name}</h2>
-              <p className="text-gray-400 text-lg">{email}</p>
-              <p className="text-orange-400 text-sm mt-1">@{username}</p>
+              <h2 className="text-2xl font-semibold text-white">{user.name}</h2>
+              <p className="text-gray-400 text-lg">{user.email}</p>
+              <p className="text-orange-400 text-sm mt-1">@{user.username}</p>
             </div>
           </motion.div>
 
           {/* Detailed Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name */}
-            <motion.div 
+            <motion.div
               className="mb-5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -101,12 +125,12 @@ function PersonalInfo() {
                 <User size={18} className="text-orange-400" /> Full Name
               </h3>
               <div className="bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-4 text-white font-medium hover:border-orange-500/50 transition-colors duration-300">
-                {name}
+                {user.name}
               </div>
             </motion.div>
 
             {/* Username */}
-            <motion.div 
+            <motion.div
               className="mb-5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -116,12 +140,12 @@ function PersonalInfo() {
                 <Tag size={18} className="text-blue-400" /> Username
               </h3>
               <div className="bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-4 text-white font-medium hover:border-orange-500/50 transition-colors duration-300">
-                {username}
+                {user.username}
               </div>
             </motion.div>
 
             {/* Email */}
-            <motion.div 
+            <motion.div
               className="mb-5 md:col-span-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -131,13 +155,13 @@ function PersonalInfo() {
                 <Mail size={18} className="text-green-400" /> Email Address
               </h3>
               <div className="bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-4 text-white font-medium hover:border-orange-500/50 transition-colors duration-300">
-                {email}
+                {user.email}
               </div>
             </motion.div>
           </div>
 
           {/* Account Stats */}
-          <motion.div 
+          <motion.div
             className="mt-8 p-6 bg-gray-700/30 rounded-xl border border-gray-600"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

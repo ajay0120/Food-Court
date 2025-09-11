@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../api/axios";
 import { motion } from "framer-motion";
 import { Clock, CheckCircle, XCircle, Package, Calendar, CreditCard, ShoppingBag } from "lucide-react";
 import { ORDER_STATUSES } from "../../../common/orderEnums";
@@ -10,16 +10,11 @@ const PreviousOrders = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Placed");
   const token = localStorage.getItem("token");
-  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(`${baseURL}/api/orders/myorders`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await axios.get(`/orders/myorders`);
         setOrders(res.data);
         setLoading(false);
       } catch (err) {
@@ -50,13 +45,7 @@ const PreviousOrders = () => {
 
     try {
       await axios.put(
-        `${baseURL}/api/orders/cancel/${orderId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/orders/cancel/${orderId}`
       );
 
       // Update the order status in the UI

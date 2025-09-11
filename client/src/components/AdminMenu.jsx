@@ -34,7 +34,6 @@ const AdminMenu = () => {
   const fetchDeletedItems = useCallback(async (page = 1, category = "all") => {
     try {
       const res = await axios.get("/menu/deleted", {
-        headers: { Authorization: `Bearer ${token}` },
         params: {
           page,
           limit: itemsPerPage,
@@ -133,9 +132,7 @@ const AdminMenu = () => {
     // console.log("Payload being sent:", payload);
 
     try {
-      await axios.post("/menu", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post("/menu", payload);
       toast.success("Item added successfully!");
       fetchMenu(currentPage, selectedCategory);
       resetForm();
@@ -199,9 +196,7 @@ const AdminMenu = () => {
     };
 
     try {
-      await axios.put(`/menu/${editId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put(`/menu/${editId}`, payload);
       toast.success("Item updated successfully!");
       fetchMenu(currentPage, selectedCategory);
       resetForm();
@@ -219,9 +214,7 @@ const AdminMenu = () => {
   const handlePermanentDelete = async (id) => {
     if (window.confirm("Are you sure you want to permanently delete this item?")) {
       try {
-        await axios.delete(`/menu/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.delete(`/menu/${id}`);
         toast.success("Item deleted!");
         fetchDeletedItems(currentPage, selectedCategory);
       } catch (err) {
@@ -233,9 +226,7 @@ const AdminMenu = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       try {
-        await axios.patch(`/menu/${id}`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.patch(`/menu/${id}`);
         toast.success("Item moved to deleted items!");
         fetchMenu(currentPage, selectedCategory);
       } catch (err) {
@@ -247,9 +238,7 @@ const AdminMenu = () => {
   const handleRestore = async (id) => {
     if (window.confirm("Are you sure you want to restore this item?")) {
       try {
-        await axios.patch(`/menu/${id}/restore`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.patch(`/menu/${id}/restore`);
         toast.success("Item restored successfully!");
         fetchDeletedItems(currentPage, selectedCategory);
       } catch (err) {

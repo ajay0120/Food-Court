@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { PAYMENT_METHODS } from "../../../common/orderEnums"; 
@@ -17,11 +17,8 @@ function Payment() {
   const fetchCartData = async () => {
     try {
       const token = localStorage.getItem("token");
-      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-      const res = await axios.get(`${baseURL}/api/cart`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`/cart`);
 
       const itemsForDisplay = res.data.map((item) => ({
         ...item.product,
@@ -53,32 +50,20 @@ function Payment() {
   const placeOrder = async (paymentMethod) => {
     try {
       const token = localStorage.getItem("token");
-      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       // console.log("paymentMethod:", paymentMethod);
       const res = await axios.post(
-        `${baseURL}/api/orders`,
+        `/orders`,
         {
           items: orderItems, // Use correctly formatted items
           total: totalAmount,
           paymentMethod,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
       toast.success("Order placed successfully!");
 
       // Clear cart in backend
-      await fetch(`${baseURL}/api/cart/clear`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.delete(`/cart/clear`);
 
       // Clear frontend state
       setCartItems([]);
