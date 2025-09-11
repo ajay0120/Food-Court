@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { User, Package, LogOut, UserCircle, MapPin, Calendar, Clock, CheckCircle, XCircle, Settings } from "lucide-react";
 import Navbar from "./Navbar";
 import Avatar from "react-avatar";
-import axios from "axios";
+import axios from "../api/axios";
 import PersonalInfo from "./PersonalInfo";
 import CurrentOrders from "./CurrentOrders";
 import PastOrders from "./PastOrders";
@@ -19,13 +19,10 @@ const AdminProfile = () => {
   const [cancelledOrders, setCancelledOrders] = useState([]);
 
   const token = localStorage.getItem("token");
-  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const fetchCurrentOrders = async () => {
     try {
-      const res = await axios.get(`${baseURL}/api/orders/currentOrders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`/orders/currentOrders`);
       setCurrentOrders(res.data);
     } catch (error) {
       console.error("Error fetching current orders", error);
@@ -34,10 +31,7 @@ const AdminProfile = () => {
 
   const fetchPastOrders = async () => {
     try {
-      const res = await axios.get(`${baseURL}/api/orders/pastOrders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // console.log(res);
+      const res = await axios.get(`/orders/pastOrders`);
       setPastOrders(res.data);
     } catch (error) {
       console.error("Error fetching past orders", error);
@@ -46,10 +40,7 @@ const AdminProfile = () => {
 
   const fetchCancelledOrders = async () => {
     try {
-      const res = await axios.get(`${baseURL}/api/orders/cancelledOrders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // console.log("Cancelled Orders", res);
+      const res = await axios.get(`/orders/cancelledOrders`);
       setCancelledOrders(res.data);
     } catch (error) {
       console.error("Error fetching cancelled orders", error);
@@ -65,13 +56,9 @@ const AdminProfile = () => {
   const markAsDelivered = async (orderId) => {
     try {
       await axios.post(
-        `${baseURL}/api/orders/markAsDelivered`,
-        { orderId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        `/orders/markAsDelivered`,
+        { orderId }
       );
-      // console.log("Marked as delivered");
       await fetchCurrentOrders();
       await fetchPastOrders();
     } catch (error) {

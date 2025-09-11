@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Package, LogOut, UserCircle, MapPin, Calendar } from "lucide-react";
@@ -6,15 +6,35 @@ import Avatar from "react-avatar";
 import Navbar from "./Navbar"; 
 import PersonalInfo from "./PersonalInfo";
 import PreviousOrders from "./PreviousOrders";
+import axios from '../api/axios'; 
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null); // State to hold user data from API
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const [activeSection, setActiveSection] = useState("profile");
   const [activeTab, setActiveTab] = useState("Personal");
 
-  const username = localStorage.getItem("username");
-  const email = localStorage.getItem("email");
-  const name = localStorage.getItem("name");
+  // Fetch profile data from the API when the component loads
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data } = await axios.get("/users/profile");
+        setUser(data);
+      } catch (error) {
+        console.error("Failed to fetch profile", error);
+        // Optional: handle error, e.g., redirect to login if unauthorized
+        if (error.response?.status === 401) {
+          handleLogout();
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
 
   const handleLogout = () => {
     localStorage.clear();
@@ -24,6 +44,16 @@ const Profile = () => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+
+  // Render a loading state
+  if (isLoading) {
+    return <div>Loading profile...</div>;
+  }
+
+  // Render if user data failed to load
+  if (!user) {
+    return <div>Could not load profile. Please try logging in again.</div>;
+  }
 
   const renderSubSection = () => {
     switch (activeTab) {

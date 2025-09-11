@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../api/axios";
 
 const CartContext = createContext();
 
@@ -12,9 +12,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = async () => {
     if (!token) return;
     try {
-      const res = await axios.get("/api/cart", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get("/cart");
       setCart(res.data);
     } catch (err) {
       console.error("Error fetching cart", err);
@@ -28,9 +26,8 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (productId) => {
     if (token) {
       await axios.post(
-        "/api/cart/add",
-        { productId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        "/cart/add",
+        { productId }
       );
       fetchCart();
     } else {
@@ -47,9 +44,8 @@ export const CartProvider = ({ children }) => {
   const updateCart = async (itemId, quantity) => {
     if (token) {
       await axios.put(
-        `/api/cart/update/${itemId}`,
-        { quantity },
-        { headers: { Authorization: `Bearer ${token}` } }
+        `/cart/update/${itemId}`,
+        { quantity }
       );
       fetchCart();
     }
@@ -57,9 +53,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (itemId) => {
     if (token) {
-      await axios.delete(`/api/cart/remove/${itemId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(`/cart/remove/${itemId}`);
       fetchCart();
     }
   };

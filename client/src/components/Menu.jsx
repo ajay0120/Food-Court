@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Minus, ShoppingCart, Utensils, ChevronDown } from "lucide-react";
-import axios from "axios";
+import axios from "../api/axios";
 import Navbar from "./Navbar";
 import { fetchCartData, updateCartItem } from "../services/cartService";
 import { MenuItemSkeleton } from "./skeletons";
@@ -159,8 +159,7 @@ function Menu() {
         type: currentType || "",
         category: currentCategories.join(',') || "",
       });
-      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-      const res = await axios.get(`${baseURL}/api/menu?${queryParams}`);
+      const res = await axios.get(`/menu?${queryParams}`);
       
       // Calculate elapsed time and remaining delay needed
       const elapsedTime = Date.now() - startTime;

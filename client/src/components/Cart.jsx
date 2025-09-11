@@ -1,7 +1,7 @@
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import { CartItemSkeleton } from "./skeletons";
@@ -19,8 +19,6 @@ function Cart() {
   }, []);
 
   const fetchCartItems = async () => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-    
     let startTime; // Declare in function scope for catch block access
     try {
       setIsLoading(true);
@@ -30,9 +28,7 @@ function Cart() {
       const minLoadingTime = 700; // 700ms minimum loading time
       
       if (token) {
-        const res = await axios.get(`${baseURL}/api/cart`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(`/cart`);
         const items = res.data.map((item) => ({
           ...item.product,
           quantity: item.quantity,
@@ -51,7 +47,7 @@ function Cart() {
         calculateTotal(items);
       } else {
         const localCart = JSON.parse(localStorage.getItem("cart")) || {};
-        const foodRes = await axios.get(`${baseURL}/api/food`);
+        const foodRes = await axios.get(`/food`);
         const items = foodRes.data
           .filter((item) => localCart[item._id])
           .map((item) => ({
@@ -93,7 +89,6 @@ function Cart() {
   };
 
   const updateQuantity = async (id, delta) => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
     const existingItem = cartItems.find((item) => item._id === id);
     if (!existingItem) return;
     const newQty = existingItem.quantity + delta;
@@ -110,8 +105,7 @@ function Cart() {
           });
           // console.log(token);
           await axios.delete(
-            `${baseURL}/api/cart/remove/${id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            `/cart/remove/${id}`
           );
 
         } catch (err) {
@@ -130,9 +124,8 @@ function Cart() {
       if (token) {
         try {
           await axios.put(
-            `${baseURL}/api/cart/update/${id}`,
-            { quantity: newQty },
-            { headers: { Authorization: `Bearer ${token}` } }
+            `/cart/update/${id}`,
+            { quantity: newQty }
           );
         } catch (err) {
           console.error("Error updating cart:", err.message);
@@ -149,8 +142,6 @@ function Cart() {
   };
 
   const handlePlaceOrder = async () => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-    
     if (!token) {
       alert("Login to place an order.");
       return navigate("/login");
@@ -164,18 +155,14 @@ function Cart() {
         })),
       };
 
-      await axios.post(`${baseURL}/api/order`, orderData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(`/order`, orderData);
 
       alert("Order placed successfully!");
       setCartItems([]);
       setTotal(0);
 
       if (token) {
-        await axios.delete(`${baseURL}/api/cart/clear`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.delete(`/cart/clear`);
       } else {
         localStorage.removeItem("cart");
       }

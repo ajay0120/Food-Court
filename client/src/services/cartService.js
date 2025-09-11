@@ -1,9 +1,8 @@
-import axios from "axios";
+import axios from "../api/axios";
 import toast from "react-hot-toast";
 
 const getBaseURL = () => {
-  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-  return `${baseURL}/api/cart`;
+  return `/cart`;
 };
 
 const BASE_URL = getBaseURL();
@@ -11,9 +10,7 @@ const BASE_URL = getBaseURL();
 export const fetchCartData = async (token) => {
   if (token) {
     try {
-      const res = await axios.get(BASE_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(BASE_URL);
       const cartData = {};
       res.data.forEach(item => {
         cartData[item.product._id] = item.quantity;
@@ -34,26 +31,18 @@ export const updateCartItem = async (token, productId, newQty, currentCart = {})
   if (token) {
     try {
       if (newQty === 0) {
-        await axios.delete(`${BASE_URL}/remove/${productId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.delete(`${BASE_URL}/remove/${productId}`);
         toast("Item removed from cart", { icon: "🗑️" });
       } else if (!currentCart[productId]) {
         await axios.post(
           `${BASE_URL}/add`,
-          { productId },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { productId }
         );
         toast.success("Item added to cart");
       } else {
         await axios.put(
           `${BASE_URL}/update/${productId}`,
-          { quantity: newQty },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { quantity: newQty }
         );
         toast.success("Cart updated");
       }

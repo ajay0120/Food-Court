@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Utensils } from "lucide-react";
-import axios from "axios";
+import axios from "./api/axios"; 
 import Navbar from "./components/Navbar";
 
 function LandingPage() {
@@ -20,8 +20,7 @@ function LandingPage() {
 
   const fetchFeaturedItems = async () => {
     try {
-      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-      const res = await axios.get(`${baseURL}/api/menu?limit=100`);
+      const res = await axios.get(`/menu?limit=100`);
       // Get 6 random items from the response
       const allItems = res.data.items;
       const shuffled = allItems.sort(() => 0.5 - Math.random());
