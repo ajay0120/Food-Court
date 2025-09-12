@@ -1,6 +1,7 @@
 const Order = require("../models/order");
 const Food = require("../models/Food");
 const logger = require('../logger.js');
+const { validateObjectId, validatePositiveInt, buildValidationError } = require('../utils/validation');
 
 logger.info("orderController loaded");
 
@@ -30,6 +31,23 @@ const buildMeta = ({ total, page, limit }) => {
 
 const placeOrder = async (req, res) => {
   const { items, total, paymentMethod } = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json(buildValidationError("Items required"));
+  }
+  for (const it of items) {
+    if (!validateObjectId(it.product)) {
+      return res.status(400).json(buildValidationError("Invalid product id in items", { product: it.product }));
+    }
+    if (!validatePositiveInt(it.quantity, { min: 1, max: 100 })) {
+      return res.status(400).json(buildValidationError("Invalid quantity in items", { quantity: it.quantity }));
+    }
+  }
+  if (typeof paymentMethod !== 'string') {
+    return res.status(400).json(buildValidationError("Payment method required"));
+  }
+  if (typeof total !== 'number' || total < 0) {
+    return res.status(400).json(buildValidationError("Invalid total", { total }));
+  }
 
   try {
     logger.info(`Placing order for user ${req.user.id}`);
@@ -107,9 +125,8 @@ const getUserOrders = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    if (!orderId) {
-      logger.warn("Order ID is required for cancellation");
-      return res.status(400).json({ message: "Order ID is required" });
+    if (!validateObjectId(orderId)) {
+      return res.status(400).json(buildValidationError("Invalid order id", { orderId }));
     }
 
     const order = await Order.findById(orderId);
@@ -229,9 +246,8 @@ const markAsDelivered = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
     const { orderId } = req.body;
-    if (!orderId) {
-      logger.warn("Mark as delivered attempt without order ID");
-      return res.status(400).json({ message: "Order ID is required" });
+    if (!validateObjectId(orderId)) {
+      return res.status(400).json(buildValidationError("Invalid order id", { orderId }));
     }
     const orderExist = await Order.find({ orderId });
     if (!orderExist) {

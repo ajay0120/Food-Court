@@ -1,5 +1,6 @@
 const Food = require("../models/Food");
 const logger = require('../logger.js');
+const { validateRequiredString, validateObjectId, buildValidationError } = require('../utils/validation');
 
 logger.info("menuController loaded");
 
@@ -118,12 +119,18 @@ const getDeletedMenuItems = async (req, res) => {
 const addMenuItem = async (req, res) => {
   try {
     let { name, desc, img, price, type, category } = req.body;
-
-    if (!name || !desc || !price?.org) {
-      logger.warn("Attempt to add menu item with missing fields");
-      return res.status(400).json({ message: "Name, description, and price are required" });
+    if (!validateRequiredString(name, { min: 2, max: 80 })) {
+      return res.status(400).json(buildValidationError("Invalid name", { name }));
     }
-
+    if (!validateRequiredString(desc, { min: 5, max: 500 })) {
+      return res.status(400).json(buildValidationError("Invalid description", { desc }));
+    }
+    if (!price || typeof price.org !== 'number' || price.org <= 0) {
+      return res.status(400).json(buildValidationError("Invalid price", { price }));
+    }
+    if (!Array.isArray(category) || category.length === 0) {
+      return res.status(400).json(buildValidationError("Category array required", { category }));
+    }
     
     category = category.map((cat) => cat.trim());
 
@@ -164,6 +171,10 @@ const addMenuItem = async (req, res) => {
 // UPDATE menu item (admin only)
 const updateMenuItem = async (req, res) => {
   try {
+    if (!validateObjectId(req.params.id)) {
+      return res.status(400).json(buildValidationError("Invalid menu item id", { id: req.params.id }));
+    }
+
     const updatedItem = await Food.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
@@ -183,6 +194,9 @@ const updateMenuItem = async (req, res) => {
 
 const deleteMenuItem = async (req, res) => {
   try {
+    if (!validateObjectId(req.params.id)) {
+      return res.status(400).json(buildValidationError("Invalid menu item id", { id: req.params.id }));
+    }
 
     const updatedItem = await Food.findByIdAndUpdate(
       req.params.id,
@@ -203,6 +217,10 @@ const deleteMenuItem = async (req, res) => {
 
 const restoreDeletedItem = async (req, res) => {
   try {
+    if (!validateObjectId(req.params.id)) {
+      return res.status(400).json(buildValidationError("Invalid menu item id", { id: req.params.id }));
+    }
+
     const updatedItem = await Food.findByIdAndUpdate(
       req.params.id,
       { $set: { isDeleted: false } },
@@ -223,6 +241,10 @@ const restoreDeletedItem = async (req, res) => {
 // DELETE menu item (admin only)
 const permanentDeleteMenuItem = async (req, res) => {
   try {
+    if (!validateObjectId(req.params.id)) {
+      return res.status(400).json(buildValidationError("Invalid menu item id", { id: req.params.id }));
+    }
+
     await Food.findByIdAndDelete(req.params.id);
     logger.info(`Menu item deleted: ${req.params.id}`);
     res.status(200).json({ message: "Item deleted successfully" });
