@@ -1,14 +1,13 @@
-const crypto = require("crypto");
-
-const User = require("../models/User.js");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const OTP = require("../models/otp");
-const sendMail = require("../utils/sendMail");
-const logger = require('../logger.js');
-const resendOtp = require("../utils/reSendOpt.js");
-const { OAuth2Client } = require('google-auth-library');
-const { validateEmail, sanitizeEmail, validateRequiredString, buildValidationError } = require('../utils/validation');
+import crypto from "crypto";
+import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import OTP from "../models/otp.js";
+import sendMail from "../utils/sendMail.js";
+import logger from '../logger.js';
+import resendOtp from "../utils/reSendOpt.js";
+import { OAuth2Client } from 'google-auth-library';
+import { validateEmail, sanitizeEmail, validateRequiredString, buildValidationError } from '../utils/validation.js';
 
 
 logger.info("authController loaded");
@@ -36,13 +35,13 @@ const signup = async (req, res) => {
     try {
         const existingUser = await User.findOne({ email });
 
-        // 🚫 Case 1: User already verified
+        //  Case 1: User already verified
         if (existingUser && existingUser.verified) {
             logger.warn(`Signup attempt for already verified email: ${email}`);
             return res.status(400).json({ message: "User already exists. Please login." });
         }
 
-        // 🔁 Case 2: User exists but not verified → resend OTP and continue
+        //  Case 2: User exists but not verified → resend OTP and continue
         if (existingUser && !existingUser.verified) {
             logger.info(`User exists but not verified. Resending OTP to ${email}`);
             await resendOtp(email); // Create a helper function for this
@@ -50,7 +49,7 @@ const signup = async (req, res) => {
             return res.status(200).json({ message: "User already exists but not verified. OTP resent." });
         }
 
-        // ✅ Case 3: New user → Create user
+        //  Case 3: New user → Create user
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
@@ -169,14 +168,14 @@ const verifyOtp = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // ✅ Mark user as verified
+        //  Mark user as verified
         user.verified = true;
         await user.save();
 
         await OTP.deleteOne({ email }); // Clean up the used OTP
         logger.info(`OTP deleted after successful verification for email: ${email}`);
 
-        // ✅ Issue JWT
+        //  Issue JWT
         const token = jwt.sign(
             { id: user._id, role: user.role, email: user.email, username: user.username },
             process.env.SECRET_KEY,
@@ -295,4 +294,4 @@ const googleLogin = async (req, res) => {
 };
 
 
-module.exports = { signup, login, sendOtp, verifyOtp, googleLogin };
+export { signup, login, sendOtp, verifyOtp, googleLogin };

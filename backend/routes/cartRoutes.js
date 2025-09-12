@@ -1,13 +1,7 @@
-const express = require("express");
-const {
-  addToCart,
-  updateCartItem,
-  removeFromCart,
-  getCart,
-  clearAll,
-} = require("../controllers/cartController");
-const { protect } = require("../middleware/authMiddleware");
-const {createHybridRateLimiter} = require("../middleware/rateLimitingMiddleware");
+import express from "express";
+import { addToCart, updateCartItem, removeFromCart, getCart, clearAll } from "../controllers/cartController.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { createHybridRateLimiter } from "../middleware/rateLimitingMiddleware.js";
 
 const router = express.Router();
 
@@ -28,4 +22,4 @@ router.post("/add", ipRateLimiter, protect, cartRateLimiter, addToCart);
 router.put("/update/:itemId", ipRateLimiter, protect, cartRateLimiter, updateCartItem);
 router.delete("/remove/:itemId", ipRateLimiter, protect, cartRateLimiter, removeFromCart);
 router.delete("/clear", ipRateLimiter, protect, cartRateLimiter, clearAll);
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const mongoose =require("mongoose") ;
-const { USER_ROLES } = require("../constants/userEnums");
+import mongoose from "mongoose";
+import { USER_ROLES } from "../constants/userEnums.js";
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -69,4 +69,4 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", UserSchema);
+export default mongoose.model("User", UserSchema);

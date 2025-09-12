@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { ORDER_STATUSES, PAYMENT_METHODS } = require("../../common/orderEnums");
+import mongoose from "mongoose";
+import { ORDER_STATUSES, PAYMENT_METHODS } from "../../common/orderEnums.js";
 
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -23,4 +23,4 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+export default mongoose.model("Order", orderSchema);

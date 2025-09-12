@@ -65,7 +65,7 @@ const AboutUs = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <h2 className="text-2xl font-semibold text-gray-200 mb-4">
-              Our Story is Being Written! 📖
+              Our Story is Being Written! 
             </h2>
             <p className="text-gray-400 text-lg leading-relaxed mb-6">
               We're crafting a comprehensive story about our journey, mission, and the passionate team 

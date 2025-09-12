@@ -65,7 +65,7 @@ const ContactUs = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <h2 className="text-2xl font-semibold text-gray-200 mb-4">
-              We'd Love to Hear From You! 📧
+              We'd Love to Hear From You!
             </h2>
             <p className="text-gray-400 text-lg leading-relaxed mb-6">
               Our customer support system is currently being enhanced to provide you with the best 

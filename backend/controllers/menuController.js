@@ -1,17 +1,13 @@
-const Food = require("../models/Food");
-const logger = require('../logger.js');
-const { validateRequiredString, validateObjectId, buildValidationError } = require('../utils/validation');
+import Food from "../models/Food.js";
+import logger from '../logger.js';
+import { validateRequiredString, validateObjectId, buildValidationError } from '../utils/validation.js';
 // Whitelists for validation (fall back to array if require fails)
 let FOOD_TYPES = ["veg", "non-veg"]; // default
 let FOOD_CATEGORIES = ["Indian","Chinese","Snack","Beverage","Dessert","Continental","American"];
-try {
-  const enums = require('../../common/foodEnums');
-  // Support either CommonJS export or ES module transpiled default
-  FOOD_TYPES = enums.FOOD_TYPES || FOOD_TYPES;
-  FOOD_CATEGORIES = enums.FOOD_CATEGORIES || FOOD_CATEGORIES;
-} catch (_) {
-  // ignore if not resolvable
-}
+// Import enums directly (ESM)
+import * as FoodEnums from '../../common/foodEnums.js';
+FOOD_TYPES = FoodEnums.FOOD_TYPES || FOOD_TYPES;
+FOOD_CATEGORIES = FoodEnums.FOOD_CATEGORIES || FOOD_CATEGORIES;
 
 logger.info("menuController loaded");
 
@@ -388,7 +384,7 @@ const permanentDeleteMenuItem = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getMenu,
   addMenuItem,
   updateMenuItem,
