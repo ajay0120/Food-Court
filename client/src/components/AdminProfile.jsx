@@ -17,41 +17,56 @@ const AdminProfile = () => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [pastOrders, setPastOrders] = useState([]);
   const [cancelledOrders, setCancelledOrders] = useState([]);
+  // pagination states
+  const [currentPageCurrent, setCurrentPageCurrent] = useState(1);
+  const [currentPagePast, setCurrentPagePast] = useState(1);
+  const [currentPageCancelled, setCurrentPageCancelled] = useState(1);
+  const pageLimit = 10;
+  const [metaCurrent, setMetaCurrent] = useState(null);
+  const [metaPast, setMetaPast] = useState(null);
+  const [metaCancelled, setMetaCancelled] = useState(null);
 
   const token = localStorage.getItem("token");
 
-  const fetchCurrentOrders = async () => {
+  const fetchCurrentOrders = async (page = 1) => {
     try {
-      const res = await axios.get(`/orders/currentOrders`);
-      setCurrentOrders(res.data);
+      const res = await axios.get(`/orders/currentOrders`, { params: { page, limit: pageLimit } });
+      setCurrentOrders(res.data.orders || []);
+      setMetaCurrent(res.data.pagination || null);
     } catch (error) {
       console.error("Error fetching current orders", error);
     }
   };
 
-  const fetchPastOrders = async () => {
+  const fetchPastOrders = async (page = 1) => {
     try {
-      const res = await axios.get(`/orders/pastOrders`);
-      setPastOrders(res.data);
+      const res = await axios.get(`/orders/pastOrders`, { params: { page, limit: pageLimit } });
+      setPastOrders(res.data.orders || []);
+      setMetaPast(res.data.pagination || null);
     } catch (error) {
       console.error("Error fetching past orders", error);
     }
   };
 
-  const fetchCancelledOrders = async () => {
+  const fetchCancelledOrders = async (page = 1) => {
     try {
-      const res = await axios.get(`/orders/cancelledOrders`);
-      setCancelledOrders(res.data);
+      const res = await axios.get(`/orders/cancelledOrders`, { params: { page, limit: pageLimit } });
+      setCancelledOrders(res.data.orders || []);
+      setMetaCancelled(res.data.pagination || null);
     } catch (error) {
       console.error("Error fetching cancelled orders", error);
     }
   };
 
   useEffect(() => {
-    fetchCurrentOrders();
-    fetchPastOrders();
-    fetchCancelledOrders();
-  }, []);
+    fetchCurrentOrders(currentPageCurrent);
+  }, [currentPageCurrent]);
+  useEffect(() => {
+    fetchPastOrders(currentPagePast);
+  }, [currentPagePast]);
+  useEffect(() => {
+    fetchCancelledOrders(currentPageCancelled);
+  }, [currentPageCancelled]);
 
   const markAsDelivered = async (orderId) => {
     try {
@@ -111,6 +126,13 @@ const AdminProfile = () => {
                     />
                   </motion.div>
                 ))}
+                {metaCurrent && (
+                  <div className="flex justify-center items-center gap-4 mt-6">
+                    <button disabled={!metaCurrent.hasPrev} onClick={() => setCurrentPageCurrent(p => Math.max(1, p - 1))} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCurrent.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
+                    <span className="text-sm text-gray-300">Page {metaCurrent.page} of {metaCurrent.totalPages}</span>
+                    <button disabled={!metaCurrent.hasNext} onClick={() => setCurrentPageCurrent(p => p + 1)} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCurrent.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
+                  </div>
+                )}
               </motion.div>
             )}
           </div>
@@ -145,6 +167,13 @@ const AdminProfile = () => {
                     <PastOrders order={order} index={index} />
                   </motion.div>
                 ))}
+                {metaPast && (
+                  <div className="flex justify-center items-center gap-4 mt-6">
+                    <button disabled={!metaPast.hasPrev} onClick={() => setCurrentPagePast(p => Math.max(1, p - 1))} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaPast.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
+                    <span className="text-sm text-gray-300">Page {metaPast.page} of {metaPast.totalPages}</span>
+                    <button disabled={!metaPast.hasNext} onClick={() => setCurrentPagePast(p => p + 1)} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaPast.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
+                  </div>
+                )}
               </motion.div>
             )}
           </div>
@@ -179,6 +208,13 @@ const AdminProfile = () => {
                     <CancelledOrders order={order} index={index} />
                   </motion.div>
                 ))}
+                {metaCancelled && (
+                  <div className="flex justify-center items-center gap-4 mt-6">
+                    <button disabled={!metaCancelled.hasPrev} onClick={() => setCurrentPageCancelled(p => Math.max(1, p - 1))} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCancelled.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
+                    <span className="text-sm text-gray-300">Page {metaCancelled.page} of {metaCancelled.totalPages}</span>
+                    <button disabled={!metaCancelled.hasNext} onClick={() => setCurrentPageCancelled(p => p + 1)} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCancelled.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
+                  </div>
+                )}
               </motion.div>
             )}
           </div>
