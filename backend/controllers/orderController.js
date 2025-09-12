@@ -58,25 +58,38 @@ const placeOrder = async (req, res) => {
       paymentMethod,
       status: "Placed",
     });
+    // Batch fetch & validate items (avoid N+1 queries)
+    const productIds = [...new Set(items.map(i => i.product))];
+    const foods = await Food.find({ _id: { $in: productIds } })
+      .select('price.org inStock isDeleted');
+    const foodMap = new Map(foods.map(f => [f._id.toString(), f]));
 
-    // Validate items
-    for (const item of items) {
-      const foodItem = await Food.findById(item.product);
-      if (!foodItem) {
-        logger.warn(`Invalid food item in order: ${item.product}`);
-        return res.status(400).json({ message: "Invalid food item" });
-      }
+    // Detect missing products
+    const missing = productIds.filter(id => !foodMap.has(id));
+    if (missing.length) {
+      logger.warn(`Order contains invalid product ids: ${missing.join(', ')}`);
+      return res.status(400).json(buildValidationError("One or more products are invalid", { missing }));
     }
 
-    // Calculate total price
+    // Validate stock & deletion status, calculate total
     let calculatedTotal = 0;
     for (const item of items) {
-      const foodItem = await Food.findById(item.product);
-      if (foodItem) {
-        calculatedTotal += foodItem.price.org * item.quantity;
+      const f = foodMap.get(item.product);
+      if (f.isDeleted) {
+        logger.warn(`Attempt to order deleted product ${item.product}`);
+        return res.status(400).json(buildValidationError("Product no longer available", { product: item.product }));
       }
+      if (!f.inStock) {
+        logger.warn(`Attempt to order out-of-stock product ${item.product}`);
+        return res.status(400).json(buildValidationError("Product out of stock", { product: item.product }));
+      }
+      if (typeof f.price?.org !== 'number' || f.price.org <= 0) {
+        logger.warn(`Invalid price data for product ${item.product}`);
+        return res.status(400).json(buildValidationError("Invalid product price", { product: item.product }));
+      }
+      calculatedTotal += f.price.org * item.quantity;
     }
-    console.log("calculatedTotal", calculatedTotal);
+    logger.debug && logger.debug(`Calculated total for order: ${calculatedTotal}`);
     if (!Number.isFinite(calculatedTotal) || calculatedTotal !== total) {
       logger.warn(`Total price mismatch: calculated ${calculatedTotal}, provided ${total}`);
       return res.status(400).json({ message: "Total price mismatch" });
