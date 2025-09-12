@@ -1,6 +1,7 @@
 const User = require("../models/User.js");
 const Food = require("../models/Food.js");
 const logger = require('../logger.js');
+const { validateObjectId, validatePositiveInt, buildValidationError } = require('../utils/validation');
 
 logger.info("cartController loaded");
 
@@ -18,6 +19,9 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId } = req.body;
+    if (!validateObjectId(productId)) {
+      return res.status(400).json(buildValidationError("Invalid product id", { productId }));
+    }
     const user = await User.findById(req.user.id);
 
     const existingItem = user.cart.find((item) => item.product.toString() === productId);
@@ -41,6 +45,12 @@ const updateCartItem = async (req, res) => {
   try {
     const { itemId } = req.params;
     const { quantity } = req.body;
+    if (!validateObjectId(itemId)) {
+      return res.status(400).json(buildValidationError("Invalid item id", { itemId }));
+    }
+    if (!validatePositiveInt(quantity, { min: 1, max: 1000 })) {
+      return res.status(400).json(buildValidationError("Invalid quantity", { quantity }));
+    }
     const user = await User.findById(req.user.id);
 
     const item = user.cart.find((i) => i.product.toString() === itemId);
@@ -62,6 +72,9 @@ const updateCartItem = async (req, res) => {
 const removeFromCart = async (req, res) => {
   try {
     const { itemId } = req.params;
+    if (!validateObjectId(itemId)) {
+      return res.status(400).json(buildValidationError("Invalid item id", { itemId }));
+    }
     const user = await User.findById(req.user.id);
 
     if (!user) {

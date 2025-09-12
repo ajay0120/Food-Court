@@ -1,3 +1,5 @@
+const crypto = require("crypto");
+
 const User = require("../models/User.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -6,6 +8,8 @@ const sendMail = require("../utils/sendMail");
 const logger = require('../logger.js');
 const resendOtp = require("../utils/reSendOpt.js");
 const { OAuth2Client } = require('google-auth-library');
+const { validateEmail, sanitizeEmail, validateRequiredString, buildValidationError } = require('../utils/validation');
+
 
 logger.info("authController loaded");
 
@@ -13,11 +17,20 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signup = async (req, res) => {
     logger.info("Signup endpoint called");
-    const { name, username, email, password, role } = req.body;
+    let { name, username, email, password, role } = req.body;
 
+    // basic field presence
     if (!name || !username || !email || !password) {
-        logger.warn("Signup attempt with missing fields");
-        return res.status(400).json({ message: "All fields are required" });
+        return res.status(400).json(buildValidationError("All fields are required"));
+    }
+
+    if (!validateEmail(email)) {
+        return res.status(400).json(buildValidationError("Invalid email format", { email }));
+    }
+    email = sanitizeEmail(email);
+
+    if (!validateRequiredString(username, { min: 3, max: 40 })) {
+        return res.status(400).json(buildValidationError("Invalid username length", { username }));
     }
 
     try {
@@ -65,7 +78,12 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     logger.info("Login endpoint called");
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    if (!validateEmail(email)) {
+        return res.status(400).json(buildValidationError("Invalid credentials"));
+    }
+    email = sanitizeEmail(email);
+
     try {
         const user = await User.findOne({ email });
         if (!user) {
@@ -105,7 +123,12 @@ const login = async (req, res) => {
 // Send OTP
 const sendOtp = async (req, res) => {
     logger.info("Send OTP endpoint called");
-    const { email } = req.body;
+    let { email } = req.body;
+    if (!validateEmail(email)) {
+        return res.status(400).json(buildValidationError("Invalid email", { email }));
+    }
+    email = sanitizeEmail(email);
+
     const user = await User.findOne({ email });
     if (!user) {
         logger.warn(`OTP request for non-registered email: ${email}`);
@@ -126,7 +149,11 @@ const sendOtp = async (req, res) => {
 
 const verifyOtp = async (req, res) => {
     logger.info("Verify OTP endpoint called");
-    const { email, otp } = req.body;
+    let { email, otp } = req.body;
+    if (!validateEmail(email)) {
+        return res.status(400).json(buildValidationError("Invalid email", { email }));
+    }
+    email = sanitizeEmail(email);
 
     try {
         const existingOtp = await OTP.findOne({ email });
@@ -180,10 +207,10 @@ const verifyOtp = async (req, res) => {
 // Google OAuth Login
 const googleLogin = async (req, res) => {
     logger.info("Google login endpoint called");
-    
+
     try {
         const { credential } = req.body;
-        
+
         if (!credential) {
             logger.warn("Google login attempt without credential");
             return res.status(400).json({ message: "Google credential is required" });
@@ -196,7 +223,11 @@ const googleLogin = async (req, res) => {
         });
 
         const payload = ticket.getPayload();
-        const { sub: googleId, email, name, picture, email_verified } = payload;
+        let { sub: googleId, email, name, picture, email_verified } = payload;
+        if (!validateEmail(email)) {
+            return res.status(400).json(buildValidationError("Invalid Google email"));
+        }
+        email = sanitizeEmail(email);
 
         if (!email_verified) {
             logger.warn(`Google login attempt with unverified email: ${email}`);
@@ -216,8 +247,12 @@ const googleLogin = async (req, res) => {
             }
         } else {
             // Create new user
-            const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
-            
+            // inside your user creation flow
+            const baseName = email.split('@')[0];
+            const randomSuffix = crypto.randomInt(0, 1000); // cryptographically secure
+            const username = `${baseName}_${randomSuffix}`;
+            // const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+
             user = await User.create({
                 name,
                 username,
@@ -227,7 +262,7 @@ const googleLogin = async (req, res) => {
                 role: 'student',
                 profilePicture: picture
             });
-            
+
             logger.info(`Created new user via Google OAuth: ${email}`);
         }
 
@@ -239,7 +274,7 @@ const googleLogin = async (req, res) => {
         );
 
         logger.info(`Google login successful for: ${email}`);
-        
+
         res.status(200).json({
             message: "Google login successful",
             token,
