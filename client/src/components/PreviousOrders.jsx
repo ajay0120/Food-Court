@@ -9,13 +9,18 @@ const PreviousOrders = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Placed");
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const [pagination, setPagination] = useState(null);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(`/orders/myorders`);
-        setOrders(res.data);
+        const res = await axios.get(`/orders/myorders`, { params: { page, limit } });
+        // backend now returns { orders, pagination }
+        setOrders(res.data.orders || []);
+        setPagination(res.data.pagination || null);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching orders:", err);
@@ -24,7 +29,7 @@ const PreviousOrders = () => {
     };
 
     fetchOrders();
-  }, [token]);
+  }, [token, page]);
 
   useEffect(() => {
     const applyFilter = () => {
@@ -339,6 +344,13 @@ const PreviousOrders = () => {
         transition={{ duration: 0.3 }}
       >
         {renderSubSection()}
+        {pagination && (
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={!pagination.hasPrev} className={`px-4 py-2 bg-gray-700 rounded-lg disabled:opacity-40 ${pagination.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
+            <span className="text-sm text-gray-300">Page {pagination.page} of {pagination.totalPages}</span>
+            <button onClick={() => setPage(p => p + 1)} disabled={!pagination.hasNext} className={`px-4 py-2 bg-gray-700 rounded-lg disabled:opacity-40 ${pagination.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );

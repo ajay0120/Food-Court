@@ -4,6 +4,30 @@ const logger = require('../logger.js');
 
 logger.info("orderController loaded");
 
+// Helper to extract & sanitize pagination params
+const getPaginationParams = (req) => {
+  let page = parseInt(req.query.page, 10) || 1;
+  let limit = parseInt(req.query.limit, 10) || 10;
+  if (page < 1) page = 1;
+  if (limit < 1) limit = 10;
+  // hard cap to avoid abusive large limits
+  if (limit > 100) limit = 100;
+  return { page, limit };
+};
+
+// Build pagination meta object
+const buildMeta = ({ total, page, limit }) => {
+  const totalPages = Math.ceil(total / limit) || 1;
+  return {
+    page,
+    limit,
+    totalItems: total,
+    totalPages,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+  };
+};
+
 const placeOrder = async (req, res) => {
   const { items, total, paymentMethod } = req.body;
 
@@ -51,38 +75,28 @@ const placeOrder = async (req, res) => {
 
 const getUserOrders = async (req, res) => {
   try {
-    // console.log(req);
     logger.info(`Fetching orders for user ${req.user.id}`);
+    const { page, limit } = getPaginationParams(req);
+    const filter = { user: req.user.id };
 
-    const orders = await Order.find({ user: req.user.id })
-      .populate({
-        path: 'items.product',
-        select: 'name price img category'
-      })
-      .exec();
+    const [total, orders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter)
+        .populate({ path: 'items.product', select: 'name price img category' })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+    ]);
 
-    // console.log(orders); // Log the populated orders for debugging
-    // orders.forEach(order => {
-    //   order.items.forEach(item => {
-    //     console.log(item._id.name); // Should not be undefined
-    //     console.log("item",item._id);
-    //   });
-    // });
-
-
-    // for (const order of orders) {
-    //   for (const item of order.items) {
-    //     const food = await Food.findById(item._id).select('name price img category');
-    //     console.log(food); // Check if this returns the expected fields
-    //   }
-    // }
-    // console.log(orders[0].items[0]._id.name);
     if (orders.length === 0) {
-      logger.warn(`No previous orders found for user ${req.user.id}`);
-      return res.status(404).json({ message: "No previous orders found" });
+      logger.warn(`No orders found for user ${req.user.id} (page ${page})`);
     }
-    // console.log(dishes);
-    res.json(orders); // Return the populated orders
+
+    return res.status(200).json({
+      orders,
+      pagination: buildMeta({ total, page, limit }),
+    });
   } catch (error) {
     logger.error("Error fetching orders: " + error.message);
     res.status(500).json({ message: "Error fetching orders" });
@@ -133,18 +147,20 @@ const getAllOrders = async (req, res) => {
       logger.warn(`Access denied for user ${req.user.id} to fetch all orders`);
       return res.status(403).json({ message: "Access denied" });
     }
-    const orders = await Order.find()
-      .populate({
-        path: 'user',
-        select: 'name username',
-      })
-      .populate({
-        path: 'items.product',
-        select: 'name price img category',
-      })
-      .sort({ createdAt: -1 });
-    logger.info(`Fetched ${orders.length} orders`);
-    res.json(orders);
+    const { page, limit } = getPaginationParams(req);
+    const filter = {};
+    const [total, orders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter)
+        .populate({ path: 'user', select: 'name username' })
+        .populate({ path: 'items.product', select: 'name price img category' })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+    ]);
+    logger.info(`Fetched ${orders.length} orders (page ${page})`);
+    return res.status(200).json({ orders, pagination: buildMeta({ total, page, limit }) });
   } catch (err) {
     logger.error("Error fetching all orders: " + err.message);
     res.status(500).json({ message: "Error fetching all orders" });
@@ -158,12 +174,20 @@ const getCurrentOrders = async (req, res) => {
       logger.warn(`Access denied for user ${req.user.id} to fetch current orders`);
       return res.status(403).json({ message: "Access denied" });
     }
-    const currentOrders = await Order.find({ status: 'Placed' })
-      .populate({ path: 'user', select: 'name username' })
-      .populate({ path: 'items.product', select: 'name price img category' })
-      .sort({ createdAt: -1 });
-    logger.info(`Fetched ${currentOrders.length} current orders`);
-    res.json(currentOrders);
+    const { page, limit } = getPaginationParams(req);
+    const filter = { status: 'Placed' };
+    const [total, currentOrders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter)
+        .populate({ path: 'user', select: 'name username' })
+        .populate({ path: 'items.product', select: 'name price img category' })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+    ]);
+    logger.info(`Fetched ${currentOrders.length} current orders (page ${page})`);
+    return res.status(200).json({ orders: currentOrders, pagination: buildMeta({ total, page, limit }) });
   } catch (err) {
     logger.error("Error fetching current orders: " + err.message);
     res.status(500).json({ message: "Error fetching current orders" });
@@ -177,14 +201,21 @@ const getPastOrders = async (req, res) => {
       logger.warn(`Access denied for user ${req.user.id} to fetch past orders`);
       return res.status(403).json({ message: "Access denied" });
     }
-    const pastOrders = await Order.find({ status: 'Delivered' })
-      .populate({ path: 'user', select: 'name username' })
-      .populate({ path: 'items.product', select: 'name price img category' })
-      .sort({ createdAt: -1 });
-    logger.info(`Fetched ${pastOrders.length} past orders`);
-    // console.log(pastOrders);
-    res.json(pastOrders);
-  } catch {
+    const { page, limit } = getPaginationParams(req);
+    const filter = { status: 'Delivered' };
+    const [total, pastOrders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter)
+        .populate({ path: 'user', select: 'name username' })
+        .populate({ path: 'items.product', select: 'name price img category' })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+    ]);
+    logger.info(`Fetched ${pastOrders.length} past orders (page ${page})`);
+    return res.status(200).json({ orders: pastOrders, pagination: buildMeta({ total, page, limit }) });
+  } catch (err) {
     logger.error("Error fetching past orders: " + err.message);
     res.status(500).json({ message: "Error fetching all orders" });
   }
@@ -227,12 +258,20 @@ const getCancelledOrders = async (req, res) => {
       logger.warn(`Access denied for user ${req.user.id} to fetch cancelled orders`);
       return res.status(403).json({ message: "Access denied" });
     }
-    const cancelledOrders = await Order.find({ status: 'Cancelled' })
-      .populate({ path: 'user', select: 'name username' })
-      .populate({ path: 'items.product', select: 'name price img category' })
-      .sort({ createdAt: -1 });
-    logger.info(`Fetched ${cancelledOrders.length} cancelled orders`);
-    res.json(cancelledOrders);
+    const { page, limit } = getPaginationParams(req);
+    const filter = { status: 'Cancelled' };
+    const [total, cancelledOrders] = await Promise.all([
+      Order.countDocuments(filter),
+      Order.find(filter)
+        .populate({ path: 'user', select: 'name username' })
+        .populate({ path: 'items.product', select: 'name price img category' })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+    ]);
+    logger.info(`Fetched ${cancelledOrders.length} cancelled orders (page ${page})`);
+    return res.status(200).json({ orders: cancelledOrders, pagination: buildMeta({ total, page, limit }) });
 
   } catch (err) {
     logger.error("Error getting cancelled orders: " + err.message);
