@@ -1,58 +1,99 @@
 const Food = require("../models/Food");
 const logger = require('../logger.js');
 const { validateRequiredString, validateObjectId, buildValidationError } = require('../utils/validation');
+// Whitelists for validation (fall back to array if require fails)
+let FOOD_TYPES = ["veg", "non-veg"]; // default
+let FOOD_CATEGORIES = ["Indian","Chinese","Snack","Beverage","Dessert","Continental","American"];
+try {
+  const enums = require('../../common/foodEnums');
+  // Support either CommonJS export or ES module transpiled default
+  FOOD_TYPES = enums.FOOD_TYPES || FOOD_TYPES;
+  FOOD_CATEGORIES = enums.FOOD_CATEGORIES || FOOD_CATEGORIES;
+} catch (_) {
+  // ignore if not resolvable
+}
 
 logger.info("menuController loaded");
 
 // GET all menu items
 const getMenu = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, category } = req.query;
+    let { page = 1, limit = 20, search, type, category } = req.query;
+    // Validate & normalize pagination
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+    if (!Number.isInteger(page) || page < 1) page = 1;
+    if (!Number.isInteger(limit) || limit < 1) limit = 20;
+    if (limit > 100) limit = 100; // hard cap
+
+    // Basic whitelist for type (if provided)
+    if (type && typeof type === 'string') {
+      type = type.trim();
+      if (type.length > 40) {
+        return res.status(400).json(buildValidationError("Invalid type length", { type }));
+      }
+    }
+
+    // Escape regex special chars in search to avoid ReDoS patterns
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
     // console.log("type in backend is=",type);
     // console.log("category in backend is=",category);
     const query = {};
     // console.log("type && type!==All",(type && type!==All));
     if (type && type !== "All") {
-      // console.log("I have reached here",type);
-      query.type = type;
+      const normalizedType = type.toLowerCase();
+      if (!FOOD_TYPES.includes(normalizedType)) {
+        return res.status(400).json(buildValidationError("Invalid type value", { type }));
+      }
+      query.type = normalizedType;
     }
     // Filter by category if provided
     if (category && category !== "All" && category !== "all") {
       // Handle multiple categories (comma-separated)
-      const categories = category.split(',').map(cat => cat.trim()).filter(cat => cat);
-      if (categories.length > 0) {
-        query.category = { $in: categories };
-        // console.log("category filter applied:", query.category);
+      const categoriesRaw = category.split(',').map(cat => cat.trim()).filter(cat => cat);
+      if (categoriesRaw.length > 0) {
+        const normalized = categoriesRaw.map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase());
+        const invalid = normalized.filter(c => !FOOD_CATEGORIES.includes(c));
+        if (invalid.length) {
+          return res.status(400).json(buildValidationError("Invalid category value(s)", { invalid }));
+        }
+        query.category = { $in: normalized };
       }
     }
 
     // Search by name if provided
-    if (search) {
-      query.name = { $regex: search, $options: "i" };
+    if (search && typeof search === 'string') {
+      const safeSearch = escapeRegex(search.trim()).slice(0, 100); // limit length
+      if (safeSearch.length > 0) {
+        query.name = { $regex: safeSearch, $options: "i" };
+      }
     }
 
     //add only non-deleted items
     query.isDeleted = false;
 
+    // Count first to validate requested page
+    const totalItems = await Food.countDocuments(query);
+    const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+    if (page > totalPages) {
+      // If page out of range, optionally clamp or return error. We'll clamp.
+      page = totalPages;
+    }
     const skip = (page - 1) * limit;
 
-    // Fetch filtered & paginated items
+    // Fetch filtered & paginated items after validation
     const items = await Food.find(query)
       .skip(skip)
-      .limit(Number(limit))
+      .limit(limit)
       .select("name price desc category img type inStock isDeleted");
-    // console.log(items);
-    // Count total items for pagination
-    const totalItems = await Food.countDocuments(query);
-    const totalPages = Math.ceil(totalItems / limit);
 
     logger.info(`Fetched menu items (page: ${page}, limit: ${limit}, type: ${type}, category: ${category}, search: ${search})`);
 
     res.status(200).json({
       items,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         totalItems,
         totalPages,
       },
@@ -65,46 +106,72 @@ const getMenu = async (req, res) => {
 
 const getDeletedMenuItems = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, type, category } = req.query;
+    let { page = 1, limit = 20, search, type, category } = req.query;
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+    if (!Number.isInteger(page) || page < 1) page = 1;
+    if (!Number.isInteger(limit) || limit < 1) limit = 20;
+    if (limit > 100) limit = 100;
+    if (type && typeof type === 'string') {
+      type = type.trim();
+      if (type.length > 40) {
+        return res.status(400).json(buildValidationError("Invalid type length", { type }));
+      }
+    }
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
     const query = { isDeleted: true };
 
     // Filter by type if provided
     if (type && type !== "All") {
-      query.type = type;
+      const normalizedType = type.toLowerCase();
+      if (!FOOD_TYPES.includes(normalizedType)) {
+        return res.status(400).json(buildValidationError("Invalid type value", { type }));
+      }
+      query.type = normalizedType;
     }
 
     // Filter by category if provided
     if (category && category !== "All") {
-      // Handle multiple categories (comma-separated)
-      const categories = category.split(',').map(cat => cat.trim()).filter(cat => cat);
-      if (categories.length > 0) {
-        query.category = { $in: categories };
+      const categoriesRaw = category.split(',').map(cat => cat.trim()).filter(cat => cat);
+      if (categoriesRaw.length > 0) {
+        const normalized = categoriesRaw.map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase());
+        const invalid = normalized.filter(c => !FOOD_CATEGORIES.includes(c));
+        if (invalid.length) {
+          return res.status(400).json(buildValidationError("Invalid category value(s)", { invalid }));
+        }
+        query.category = { $in: normalized };
       }
     }
 
     // Search by name if provided
-    if (search) {
-      query.name = { $regex: search, $options: "i" };
+    if (search && typeof search === 'string') {
+      const safeSearch = escapeRegex(search.trim()).slice(0, 100);
+      if (safeSearch.length > 0) {
+        query.name = { $regex: safeSearch, $options: "i" };
+      }
     }
 
+    // Count first for validation
+    const totalItems = await Food.countDocuments(query);
+    const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+    if (page > totalPages) {
+      page = totalPages;
+    }
     const skip = (page - 1) * limit;
 
     // Fetch filtered & paginated items
     const items = await Food.find(query)
       .skip(skip)
-      .limit(Number(limit))
+      .limit(limit)
       .select("name price category img type inStock");
-    // Count total items for pagination
-    const totalItems = await Food.countDocuments(query);
-    const totalPages = Math.ceil(totalItems / limit);
 
     logger.info(`Fetched deleted menu items (page: ${page}, limit: ${limit}, type: ${type}, category: ${category}, search: ${search})`);
 
     res.status(200).json({
       items,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         totalItems,
         totalPages,
       },
@@ -131,7 +198,7 @@ const addMenuItem = async (req, res) => {
     if (!Array.isArray(category) || category.length === 0) {
       return res.status(400).json(buildValidationError("Category array required", { category }));
     }
-    
+
     category = category.map((cat) => cat.trim());
 
     // Also normalize name (optional, depends on your logic)
@@ -174,16 +241,83 @@ const updateMenuItem = async (req, res) => {
     if (!validateObjectId(req.params.id)) {
       return res.status(400).json(buildValidationError("Invalid menu item id", { id: req.params.id }));
     }
+    const { name, desc, price, category, type, img, inStock } = req.body || {};
+    const updateData = {};
 
-    const updatedItem = await Food.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true }
-    );
-    if (!updatedItem) {
-      logger.warn(`Menu item not found: ${req.params.id}`);
+    // Optional field validations (only validate if present)
+    if (name !== undefined) {
+      if (!validateRequiredString(name, { min: 2, max: 80 })) {
+        return res.status(400).json(buildValidationError("Invalid name", { name }));
+      }
+      updateData.name = name.trim().toLowerCase();
+    }
+    if (desc !== undefined) {
+      if (!validateRequiredString(desc, { min: 5, max: 500 })) {
+        return res.status(400).json(buildValidationError("Invalid description", { desc }));
+      }
+      updateData.desc = desc.trim();
+    }
+    if (price !== undefined) {
+      if (typeof price !== 'object' || typeof price.org !== 'number' || price.org <= 0) {
+        return res.status(400).json(buildValidationError("Invalid price", { price }));
+      }
+      updateData.price = { ...price };
+    }
+    if (category !== undefined) {
+      if (!Array.isArray(category) || category.length === 0) {
+        return res.status(400).json(buildValidationError("Category array required", { category }));
+      }
+      updateData.category = category.map(c => c.trim());
+    }
+    if (type !== undefined) {
+      if (!validateRequiredString(type, { min: 2, max: 40 })) {
+        return res.status(400).json(buildValidationError("Invalid type", { type }));
+      }
+      updateData.type = type.trim();
+    }
+    if (img !== undefined) {
+      if (!validateRequiredString(img, { min: 2, max: 300 })) {
+        return res.status(400).json(buildValidationError("Invalid image path", { img }));
+      }
+      updateData.img = img.trim();
+    }
+    if (inStock !== undefined) {
+      if (typeof inStock !== 'boolean') {
+        return res.status(400).json(buildValidationError("inStock must be boolean", { inStock }));
+      }
+      updateData.inStock = inStock;
+    }
+
+    // Duplicate check if name or category being updated (or both)
+    if (updateData.name || updateData.category) {
+      const current = await Food.findById(req.params.id).select('name category');
+      if (!current) {
+        return res.status(404).json({ message: "Menu item not found" });
+      }
+      const prospectiveName = updateData.name || current.name;
+      const prospectiveCategories = updateData.category || current.category;
+      const duplicate = await Food.findOne({
+        _id: { $ne: req.params.id },
+        name: prospectiveName,
+        category: { $all: prospectiveCategories, $size: prospectiveCategories.length }
+      });
+      if (duplicate) {
+        return res.status(400).json({ message: "Duplicate food item with same name and categories already exists" });
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json(buildValidationError("No valid fields provided for update"));
+    }
+
+    const foodItem = await Food.findById(req.params.id);
+    if (!foodItem) {
       return res.status(404).json({ message: "Menu item not found" });
     }
+
+    foodItem.set(updateData);
+
+    const updatedItem = await foodItem.save();
     logger.info(`Menu item updated: ${updatedItem.name} [${updatedItem.category.join(", ")}]`);
     res.status(200).json(updatedItem);
   } catch (error) {
