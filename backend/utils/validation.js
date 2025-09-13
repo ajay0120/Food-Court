@@ -1,5 +1,5 @@
-const validator = require('validator');
-const mongoose = require('mongoose');
+import validator from 'validator';
+import mongoose from 'mongoose';
 
 function validateEmail(email) {
   return typeof email === 'string' && validator.isEmail(email.trim());
@@ -32,7 +32,7 @@ function buildValidationError(message, fields = {}) {
   return { message, errors: fields };
 }
 
-module.exports = {
+export {
   validateEmail,
   sanitizeEmail,
   validateRequiredString,

@@ -1,5 +1,4 @@
-const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
-
+import { rateLimit,ipKeyGenerator } from "express-rate-limit";
 // Hybrid key generator: prefer user ID if available, else fallback to IP
 const hybridKeyGenerator = (req, res) => {
   if (req.user && req.user._id) {
@@ -21,4 +20,4 @@ function createHybridRateLimiter({ windowMs, max, message }) {
   });
 }
 
-module.exports = { createHybridRateLimiter };
+export { createHybridRateLimiter };

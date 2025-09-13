@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { FOOD_TYPES, FOOD_CATEGORIES} = require("../../common/foodEnums");
+import mongoose from "mongoose";
+import { FOOD_TYPES, FOOD_CATEGORIES } from "../../common/foodEnums.js";
 
 const FoodSchema = new mongoose.Schema(
   {
@@ -64,4 +64,4 @@ const FoodSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Food", FoodSchema);
+export default mongoose.model("Food", FoodSchema);

@@ -1,7 +1,7 @@
-const OTP = require("../models/otp");
-const sendMail = require("./sendMail");
-const logger = require('../logger.js');
-const { validateEmail, sanitizeEmail } = require('./validation');
+import OTP from "../models/otp.js";
+import sendMail from "./sendMail.js";
+import logger from '../logger.js';
+import { validateEmail, sanitizeEmail } from './validation.js';
 
 async function resendOtp(rawEmail) {
     try {
@@ -25,4 +25,4 @@ async function resendOtp(rawEmail) {
     }
 }
 
-module.exports = resendOtp;
+export default resendOtp;

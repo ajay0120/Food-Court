@@ -1,14 +1,13 @@
-const crypto = require("crypto");
-
-const User = require("../models/User.js");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const OTP = require("../models/otp");
-const sendMail = require("../utils/sendMail");
-const logger = require('../logger.js');
-const resendOtp = require("../utils/reSendOpt.js");
-const { OAuth2Client } = require('google-auth-library');
-const { validateEmail, sanitizeEmail, validateRequiredString, buildValidationError } = require('../utils/validation');
+import crypto from "crypto";
+import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import OTP from "../models/otp.js";
+import sendMail from "../utils/sendMail.js";
+import logger from '../logger.js';
+import resendOtp from "../utils/reSendOpt.js";
+import { OAuth2Client } from 'google-auth-library';
+import { validateEmail, sanitizeEmail, validateRequiredString, buildValidationError } from '../utils/validation.js';
 
 
 logger.info("authController loaded");
@@ -295,4 +294,4 @@ const googleLogin = async (req, res) => {
 };
 
 
-module.exports = { signup, login, sendOtp, verifyOtp, googleLogin };
+export { signup, login, sendOtp, verifyOtp, googleLogin };

@@ -1,7 +1,7 @@
-const User = require("../models/User.js");
-const Food = require("../models/Food.js");
-const logger = require('../logger.js');
-const { validateObjectId, validatePositiveInt, buildValidationError } = require('../utils/validation');
+import User from "../models/User.js";
+import Food from "../models/Food.js";
+import logger from '../logger.js';
+import { validateObjectId, validatePositiveInt, buildValidationError } from '../utils/validation.js';
 
 logger.info("cartController loaded");
 
@@ -125,4 +125,4 @@ const clearAll = async (req, res) => {
   }
 };
 
-module.exports = { getCart, addToCart, updateCartItem, removeFromCart, clearAll };
+export { getCart, addToCart, updateCartItem, removeFromCart, clearAll };
