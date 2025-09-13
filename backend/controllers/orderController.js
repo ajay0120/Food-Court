@@ -1,7 +1,7 @@
-const Order = require("../models/order");
-const Food = require("../models/Food");
-const logger = require('../logger.js');
-const { validateObjectId, validatePositiveInt, buildValidationError } = require('../utils/validation');
+import Order from "../models/order.js";
+import Food from "../models/Food.js";
+import logger from '../logger.js';
+import { validateObjectId, validatePositiveInt, buildValidationError } from '../utils/validation.js';
 
 logger.info("orderController loaded");
 
@@ -308,4 +308,4 @@ const getCancelledOrders = async (req, res) => {
   }
 }
 
-module.exports = { placeOrder, getUserOrders, cancelOrder, getAllOrders, getCurrentOrders, getPastOrders, getCancelledOrders, markAsDelivered };
+export { placeOrder, getUserOrders, cancelOrder, getAllOrders, getCurrentOrders, getPastOrders, getCancelledOrders, markAsDelivered };

@@ -1,7 +1,7 @@
-const express = require("express");
-const { placeOrder,getUserOrders, cancelOrder, getAllOrders, getCurrentOrders, getPastOrders,getCancelledOrders, markAsDelivered} = require("../controllers/orderController");
-const { protect, isAdmin  } = require("../middleware/authMiddleware");
-const {createHybridRateLimiter} = require("../middleware/rateLimitingMiddleware");
+import express from "express";
+import { placeOrder, getUserOrders, cancelOrder, getAllOrders, getCurrentOrders, getPastOrders, getCancelledOrders, markAsDelivered } from "../controllers/orderController.js";
+import { protect, isAdmin } from "../middleware/authMiddleware.js";
+import { createHybridRateLimiter } from "../middleware/rateLimitingMiddleware.js";
 
 const router = express.Router();
 
@@ -28,4 +28,4 @@ router.get("/cancelledOrders", ipRateLimiter, protect,isAdmin,orderRateLimiter,g
 router.post("/markAsDelivered", ipRateLimiter, protect,isAdmin,orderRateLimiter,markAsDelivered)
 router.put("/:id/deliver", ipRateLimiter, protect,isAdmin,orderRateLimiter,getAllOrders);
 
-module.exports = router;
+export default router;

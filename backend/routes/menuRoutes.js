@@ -1,7 +1,7 @@
-const express = require("express");
-const { getMenu, addMenuItem, updateMenuItem, deleteMenuItem, permanentDeleteMenuItem, restoreDeletedItem, getDeletedMenuItems } = require("../controllers/menuController.js");
-const { protect, isAdmin } = require("../middleware/authMiddleware.js");
-const {createHybridRateLimiter} = require("../middleware/rateLimitingMiddleware");
+import express from "express";
+import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem, permanentDeleteMenuItem, restoreDeletedItem, getDeletedMenuItems } from "../controllers/menuController.js";
+import { protect, isAdmin } from "../middleware/authMiddleware.js";
+import { createHybridRateLimiter } from "../middleware/rateLimitingMiddleware.js";
 
 const router = express.Router();
 
@@ -27,5 +27,5 @@ router.put("/:id", ipRateLimiter, protect, isAdmin, menuRateLimiter, updateMenuI
 router.delete("/:id", ipRateLimiter, protect, isAdmin, menuRateLimiter, permanentDeleteMenuItem);
 router.patch("/:id", ipRateLimiter, protect, isAdmin, menuRateLimiter, deleteMenuItem);
 router.patch("/:id/restore", ipRateLimiter, protect, isAdmin, menuRateLimiter, restoreDeletedItem);
-module.exports = router;
+export default router;
 

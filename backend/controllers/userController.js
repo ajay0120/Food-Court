@@ -1,5 +1,5 @@
-const User = require("../models/User");
-const Order = require("../models/order");
+import User from "../models/User.js";
+import Order from "../models/order.js";
 
 const getUserProfile = async (req, res) => {
     return res.json(req.user);
@@ -38,4 +38,4 @@ const getUserStats = async (req, res) => {
   }
 }
 
-module.exports = { getUserProfile, getUserStats };
+export { getUserProfile, getUserStats };
