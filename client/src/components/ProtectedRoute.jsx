@@ -1,16 +1,21 @@
-import React from 'react'
+import { jwtDecode } from "jwt-decode";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-
-  if(token){
-    return children;
+  const decoded = token ? jwtDecode(token) : null;
+  if(!token){
+    alert("Please login first");
+    return <Navigate to="/login"/>;
   }
-  // If no token, redirect to login page. 
-  alert("Please login first");
-  return <Navigate to="/login"/>;
-  //return token ? children : <Navigate to="/login" />;
+  const currentTime = Date.now() / 1000; // in seconds
+  if (decoded && decoded.exp < currentTime) {
+    // Token has expired
+    localStorage.removeItem("token");
+    alert("Please login first");
+    return <Navigate to="/login"/>;
+  }
+  return children;
 };
 
 
