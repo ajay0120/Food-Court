@@ -100,7 +100,7 @@ const Login = () => {
           {errors.general && <p className="text-red-500 text-sm mb-3">{errors.general}</p>}
 
           <button
-            className="w-full bg-orange-500 text-white p-3 rounded-md font-bold hover:bg-orange-600"
+            className="w-full bg-orange-500 text-white p-3 rounded-md font-bold hover:bg-orange-600 cursor-pointer transition"
             type="submit"
             disabled={loading}
           >

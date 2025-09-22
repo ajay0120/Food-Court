@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navigate } from "react-router-dom";
+import NotFound from '../NotFound';
 
 const AdminRoute = ({ children }) => {
   const role = localStorage.getItem("role");
@@ -7,8 +8,8 @@ const AdminRoute = ({ children }) => {
   if(role==="admin"){
     return children
   }
-    alert("Page not found");
-    return <Navigate to="/login"/>;
+    return <NotFound />;
+    // return <Navigate to="/login"/>;
 // return children;
 };
 

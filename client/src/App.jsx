@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import NotFound from "./NotFound";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./LandingPage";
 import Login from "./Login";
@@ -73,6 +74,7 @@ function App() {
           <Route path="/forgotPass" element={<ForgotPass/>}/>
           <Route path="/payment" element={<Payment/>}></Route>
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer/>
       </Router>
