@@ -65,7 +65,7 @@ const TodayOffers = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <h2 className="text-2xl font-semibold text-gray-200 mb-4">
-              We're Cooking Up Something Special! 🍽️
+              We're Cooking Up Something Special!
             </h2>
             <p className="text-gray-400 text-lg leading-relaxed mb-6">
               Our team is working hard to bring you the most exciting daily offers and exclusive deals. 

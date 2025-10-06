@@ -37,7 +37,7 @@ const VerifyEmail = () => {
             toast.error("Email missing. Please sign up again.");
             navigate("/signup");
         } else if (!hasSentRef.current) {
-    handleSendOtp(); // ✅ Only runs once
+    handleSendOtp();
     hasSentRef.current = true;
   }
     }, [email, navigate]);
