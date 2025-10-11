@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "./api/axios"; 
 import toast from "react-hot-toast";
 import GoogleLoginButton from "./components/GoogleLoginButton";
+import { USER_ROLES } from "../../common/userEnums";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const Login = () => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     if (token) {
-      navigate(role === "admin" ? "/admin" : "/profile");
+      navigate(role === USER_ROLES.ADMIN ? "/admin" : "/profile");
     }
   }, [navigate]);
 
@@ -39,7 +40,7 @@ const Login = () => {
       localStorage.setItem("role", user.role);
       localStorage.setItem("name",user.name);
       toast.success("Login successful!");
-      navigate(user.role === "admin" ? "/admin" : "/profile");
+      navigate(user.role === USER_ROLES.ADMIN ? "/admin" : "/profile");
     } catch (err) {
       const message = err.response?.data?.message || "Login failed";
 

@@ -8,6 +8,7 @@ import Navbar from "./Navbar";
 import { fetchCartData, updateCartItem } from "../services/cartService";
 import { MenuItemSkeleton } from "./skeletons";
 import { FOOD_TYPES, FOOD_CATEGORIES } from "../../../common/foodEnums";
+import { USER_ROLES } from '../../../common/userEnums';
 
 // Custom styles for dropdown options
 const dropdownStyles = `
@@ -265,7 +266,7 @@ function Menu() {
           Our Delicious Menu
         </motion.h1>
 
-        {userRole === "admin" && (
+        {userRole === USER_ROLES.ADMIN && (
           <motion.div 
             className="flex justify-end mb-6"
             initial={{ opacity: 0, x: 50 }}
@@ -312,7 +313,7 @@ function Menu() {
               whileHover={{ scale: 1.02 }}
             >
               <option value="" className="bg-gray-800 text-gray-400 py-2">All Types</option>
-              {FOOD_TYPES.map((foodType) => (
+              {Object.values(FOOD_TYPES).map((foodType) => (
                 <option key={foodType} value={foodType} className="bg-gray-800 text-white py-2 hover:bg-gray-700 capitalize">
                   {foodType === 'veg' ? '🟢 Vegetarian' : '🔴 Non-Vegetarian'}
                 </option>
@@ -360,7 +361,7 @@ function Menu() {
                 className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto"
               >
                 <div className="p-2">
-                  {FOOD_CATEGORIES.map((category) => (
+                  {Object.values(FOOD_CATEGORIES).map((category) => (
                     <motion.label
                       key={category}
                       className="flex items-center p-3 hover:bg-gray-700/50 rounded-xl cursor-pointer transition-colors duration-200"

@@ -38,7 +38,7 @@ const getMenu = async (req, res) => {
     // console.log("type && type!==All",(type && type!==All));
     if (type && type !== "All") {
       const normalizedType = type.toLowerCase();
-      if (!FOOD_TYPES.includes(normalizedType)) {
+      if (!Object.values(FOOD_TYPES).includes(normalizedType)) {
         return res.status(400).json(buildValidationError("Invalid type value", { type }));
       }
       query.type = normalizedType;
@@ -49,7 +49,7 @@ const getMenu = async (req, res) => {
       const categoriesRaw = category.split(',').map(cat => cat.trim()).filter(cat => cat);
       if (categoriesRaw.length > 0) {
         const normalized = categoriesRaw.map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase());
-        const invalid = normalized.filter(c => !FOOD_CATEGORIES.includes(c));
+        const invalid = normalized.filter(c => !Object.values(FOOD_CATEGORIES).includes(c));
         if (invalid.length) {
           return res.status(400).json(buildValidationError("Invalid category value(s)", { invalid }));
         }
@@ -120,7 +120,7 @@ const getDeletedMenuItems = async (req, res) => {
     // Filter by type if provided
     if (type && type !== "All") {
       const normalizedType = type.toLowerCase();
-      if (!FOOD_TYPES.includes(normalizedType)) {
+      if (!Object.values(FOOD_TYPES).includes(normalizedType)) {
         return res.status(400).json(buildValidationError("Invalid type value", { type }));
       }
       query.type = normalizedType;
@@ -131,7 +131,7 @@ const getDeletedMenuItems = async (req, res) => {
       const categoriesRaw = category.split(',').map(cat => cat.trim()).filter(cat => cat);
       if (categoriesRaw.length > 0) {
         const normalized = categoriesRaw.map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase());
-        const invalid = normalized.filter(c => !FOOD_CATEGORIES.includes(c));
+        const invalid = normalized.filter(c => !Object.values(FOOD_CATEGORIES).includes(c));
         if (invalid.length) {
           return res.status(400).json(buildValidationError("Invalid category value(s)", { invalid }));
         }

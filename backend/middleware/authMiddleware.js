@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { USER_ROLES } from "../../common/userEnums.js";
+
 const protect = async (req, res, next) => {
   let token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Not authorized, no token" });
@@ -16,7 +18,7 @@ const protect = async (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-  if (req.user?.role !== "admin") {
+  if (req.user?.role !== USER_ROLES.ADMIN) {
     return res.status(403).json({ message: "Access denied: Admins only" });
   }
   next();

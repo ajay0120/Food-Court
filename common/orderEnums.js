@@ -1,4 +1,12 @@
-export const ORDER_STATUSES = ["Placed", "Delivered", "Cancelled"];
-export const PAYMENT_METHODS = ["Cash", "Card", "UPI"];
+export const ORDER_STATUSES = {
+  PLACED: "Placed",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled"
+};
+export const PAYMENT_METHODS = {
+  CASH: "Cash",
+  CARD: "Card",
+  UPI: "UPI"
+};
 
 

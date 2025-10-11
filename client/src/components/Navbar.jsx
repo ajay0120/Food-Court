@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ShoppingCart, LogOut } from "lucide-react";
 import { useCart } from "../context/cartContext";
 import Avatar from "react-avatar";
+import { USER_ROLES } from '../../../common/userEnums';
 
 function Navbar() {
     const navigate = useNavigate();
@@ -47,7 +48,7 @@ function Navbar() {
             return;
         }
 
-        if (currentRole?.toLowerCase() === "admin") {
+        if (currentRole?.toLowerCase() === USER_ROLES.ADMIN) {
             navigate("/admin");
         } else {
             navigate("/profile");

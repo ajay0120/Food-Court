@@ -12,13 +12,13 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   paymentMethod: {
     type: String,
-    enum: PAYMENT_METHODS,
+    enum: Object.values(PAYMENT_METHODS),
     required: true,
   },
   status: {
     type: String,
-    enum: ORDER_STATUSES,
-    default: "Placed",
+    enum: Object.values(ORDER_STATUSES),
+    default: ORDER_STATUSES.PLACED,
   },
   createdAt: { type: Date, default: Date.now },
 });

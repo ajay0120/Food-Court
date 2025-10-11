@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { USER_ROLES } from "../constants/userEnums.js";
+import { USER_ROLES } from "../../common/userEnums.js";
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -31,8 +31,8 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: USER_ROLES,
-      default: "student",
+      enum: Object.values(USER_ROLES),
+      default: USER_ROLES.STUDENT,
     },
     verified: {
       type: Boolean,

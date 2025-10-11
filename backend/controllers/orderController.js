@@ -2,7 +2,8 @@ import Order from "../models/order.js";
 import Food from "../models/Food.js";
 import logger from '../logger.js';
 import { validateObjectId, validatePositiveInt, buildValidationError } from '../utils/validation.js';
-
+import { USER_ROLES } from "../../common/userEnums.js";
+import { ORDER_STATUSES } from "../../common/orderEnums.js";
 logger.info("orderController loaded");
 
 // Helper to extract & sanitize pagination params
@@ -56,7 +57,7 @@ const placeOrder = async (req, res) => {
       items,
       total,
       paymentMethod,
-      status: "Placed",
+      status: ORDER_STATUSES.PLACED,
     });
     // Batch fetch & validate items (avoid N+1 queries)
     const productIds = [...new Set(items.map(i => i.product))];
@@ -153,11 +154,11 @@ const cancelOrder = async (req, res) => {
     //   return res.status(403).json({ message: "Not authorized to cancel this order" });
     // }
 
-    if (order.status !== "Placed") {
+    if (order.status !== ORDER_STATUSES.PLACED) {
       logger.warn(`Order with ID ${orderId} cannot be cancelled, current status: ${order.status}`);
       return res.status(400).json({ message: "Only placed orders can be cancelled" });
     }
-
+    order.status = ORDER_STATUSES.CANCELLED;
     order.status = "Cancelled";
     await order.save();
 
@@ -173,7 +174,7 @@ const cancelOrder = async (req, res) => {
 const getAllOrders = async (req, res) => {
   try {
     logger.info(`Fetching all orders by user ${req.user.id}`);
-    if (req.user.role !== "admin") {
+    if (req.user.role !== USER_ROLES.ADMIN) {
       logger.warn(`Access denied for user ${req.user.id} to fetch all orders`);
       return res.status(403).json({ message: "Access denied" });
     }
@@ -200,12 +201,12 @@ const getAllOrders = async (req, res) => {
 const getCurrentOrders = async (req, res) => {
   try {
     logger.info(`Fetching current orders for user ${req.user.id}`);
-    if (req.user.role !== "admin") {
+    if (req.user.role !== USER_ROLES.ADMIN) {
       logger.warn(`Access denied for user ${req.user.id} to fetch current orders`);
       return res.status(403).json({ message: "Access denied" });
     }
     const { page, limit } = getPaginationParams(req);
-    const filter = { status: 'Placed' };
+    const filter = { status: ORDER_STATUSES.PLACED };
     const [total, currentOrders] = await Promise.all([
       Order.countDocuments(filter),
       Order.find(filter)
@@ -227,12 +228,12 @@ const getCurrentOrders = async (req, res) => {
 const getPastOrders = async (req, res) => {
   try {
     logger.info(`Fetching past orders for user ${req.user.id}`);
-    if (req.user.role != "admin") {
+    if (req.user.role != USER_ROLES.ADMIN) {
       logger.warn(`Access denied for user ${req.user.id} to fetch past orders`);
       return res.status(403).json({ message: "Access denied" });
     }
     const { page, limit } = getPaginationParams(req);
-    const filter = { status: 'Delivered' };
+    const filter = { status: ORDER_STATUSES.DELIVERED };
     const [total, pastOrders] = await Promise.all([
       Order.countDocuments(filter),
       Order.find(filter)
@@ -254,7 +255,7 @@ const getPastOrders = async (req, res) => {
 const markAsDelivered = async (req, res) => {
   try {
     logger.info(`Marking order as delivered for user ${req.user.id}`);
-    if (req.user.role != "admin") {
+    if (req.user.role != USER_ROLES.ADMIN) {
       logger.warn(`Access denied for user ${req.user.id} to mark order as delivered`);
       return res.status(403).json({ message: "Access denied" });
     }
@@ -269,7 +270,7 @@ const markAsDelivered = async (req, res) => {
     }
     await Order.updateOne(
       { _id: orderId },
-      { $set: { status: "Delivered" } }
+      { $set: { status: ORDER_STATUSES.DELIVERED } }
     );
     logger.info(`Order ${orderId} marked as delivered by user ${req.user.id}`);
     return res.status(200).json({ message: "Order marked as delivered" });
@@ -283,12 +284,12 @@ const markAsDelivered = async (req, res) => {
 const getCancelledOrders = async (req, res) => {
   try {
     logger.info(`Fetching cancelled orders for user ${req.user.id}`);
-    if (req.user.role !== "admin") {
+    if (req.user.role !== USER_ROLES.ADMIN) {
       logger.warn(`Access denied for user ${req.user.id} to fetch cancelled orders`);
       return res.status(403).json({ message: "Access denied" });
     }
     const { page, limit } = getPaginationParams(req);
-    const filter = { status: 'Cancelled' };
+    const filter = { status: ORDER_STATUSES.CANCELLED };
     const [total, cancelledOrders] = await Promise.all([
       Order.countDocuments(filter),
       Order.find(filter)

@@ -43,12 +43,12 @@ const FoodSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: FOOD_TYPES,
+      enum: Object.values(FOOD_TYPES),
       required: true,
     },
     category: {
       type: [String],
-      enum: FOOD_CATEGORIES,
+      enum: Object.values(FOOD_CATEGORIES),
       default: [],
       index: true,
     },

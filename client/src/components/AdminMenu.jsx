@@ -825,7 +825,7 @@ const AdminMenu = () => {
                       Categories <span className="text-red-400">*</span>
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {FOOD_CATEGORIES.map((cat) => (
+                      {Object.values(FOOD_CATEGORIES).map((cat) => (
                         <motion.label 
                           key={cat} 
                           className={`flex items-center space-x-3 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
@@ -923,7 +923,7 @@ const AdminMenu = () => {
                           onChange={(e) => setForm({ ...form, type: e.target.value })}
                         >
                           <option value="">Select food type</option>
-                          {FOOD_TYPES.map((type) => (
+                          {Object.values(FOOD_TYPES).map((type) => (
                             <option key={type} value={type}>
                               {type.charAt(0).toUpperCase() + type.slice(1)}
                             </option>

@@ -34,9 +34,9 @@ const PreviousOrders = () => {
   useEffect(() => {
     const applyFilter = () => {
       const filtered = orders.filter((order) => {
-        if (activeTab === "Placed") return order.status === ORDER_STATUSES[0]; // "Placed"
-        if (activeTab === "Past") return order.status === ORDER_STATUSES[1]; // "Delivered"
-        if (activeTab === "Cancelled") return order.status === ORDER_STATUSES[2]; // "Cancelled"
+        if (activeTab === "Placed") return order.status === ORDER_STATUSES.PLACED; // "Placed"
+        if (activeTab === "Past") return order.status === ORDER_STATUSES.DELIVERED; // "Delivered"
+        if (activeTab === "Cancelled") return order.status === ORDER_STATUSES.CANCELLED; // "Cancelled"
         return true;
       });
       setFilteredOrders(filtered);
@@ -56,7 +56,7 @@ const PreviousOrders = () => {
       // Update the order status in the UI
       setOrders((prev) =>
         prev.map((o) =>
-          o._id === orderId ? { ...o, status: "Cancelled" } : o
+          o._id === orderId ? { ...o, status: ORDER_STATUSES.CANCELLED } : o
         )
       );
     } catch (err) {

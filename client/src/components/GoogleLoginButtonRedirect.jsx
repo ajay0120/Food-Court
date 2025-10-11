@@ -3,6 +3,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
+import { USER_ROLES } from '../../../common/userEnums';
 
 const GoogleLoginButtonRedirect = ({ className = "" }) => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const GoogleLoginButtonRedirect = ({ className = "" }) => {
         localStorage.setItem("name", user.name);
 
         toast.success("Google login successful!");
-        navigate(user.role === "admin" ? "/admin" : "/profile");
+        navigate(user.role === USER_ROLES.ADMIN ? "/admin" : "/profile");
       } catch (error) {
         console.error('Google login error:', error);
         const message = error.response?.data?.message || "Google login failed";

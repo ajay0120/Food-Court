@@ -99,7 +99,7 @@ function Payment() {
       <div className="bg-gray-800 p-5 rounded-lg">
         <h3 className="text-xl mb-3 font-semibold">Select Payment Method</h3>
         <button
-          onClick={() => placeOrder(PAYMENT_METHODS[0])} // Using PAYMENT_METHODS[0] is cash
+          onClick={() => placeOrder(PAYMENT_METHODS.CASH)} // Use PAYMENT_METHODS.CASH for clarity
           className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600 mr-4 cursor-pointer"
         >
           Cash on Delivery
