@@ -12,12 +12,24 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,        
+  process.env.FRONTEND_URL_NEW
+  process.env.FRONTEND_URL_NEW_WWW
+];
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS blocked"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
   optionsSuccessStatus: 200,
-  // maxAge specifies how long (in seconds) the results of a preflight request can be cached; set to 600 for 10 minutes to reduce preflight requests.
   maxAge: 600,
 };
 
