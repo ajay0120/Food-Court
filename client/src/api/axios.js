@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Get base URL from environment variables with fallback
 const getBaseURL = () => {
-  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  const baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_FALLBACK || "http://localhost:5000";
   return `${baseURL}/api`;
 };
 
