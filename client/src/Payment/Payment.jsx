@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { PAYMENT_METHODS } from "../../../common/orderEnums"; 
+import { PAYMENT_METHODS } from "../../../common/orderEnums";
 
 function Payment() {
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [orderItems, setOrderItems] = useState([]); // New state
+  const [isPlacing, setIsPlacing] = useState(false); // disable UI while placing
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,17 +49,27 @@ function Payment() {
   };
 
   const placeOrder = async (paymentMethod) => {
+    if (isPlacing) return; // guard: don't allow double submits
     try {
+      setIsPlacing(true); // show spinner/message until backend answers
+
       const token = localStorage.getItem("token");
-      // console.log("paymentMethod:", paymentMethod);
-      const res = await axios.post(
-        `/orders`,
-        {
-          items: orderItems, // Use correctly formatted items
-          total: totalAmount,
-          paymentMethod,
-        }
-      );
+      const MIN_WAIT_MS = 3000;
+      const start = Date.now();
+
+      // send order to backend
+      const res = await axios.post(`/orders`, {
+        items: orderItems,
+        total: totalAmount,
+        paymentMethod,
+      });
+
+      // ensure spinner runs at least MIN_WAIT_MS even if backend is quick
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(0, MIN_WAIT_MS - elapsed);
+      if (remaining > 0) {
+        await new Promise((r) => setTimeout(r, remaining));
+      }
 
       toast.success("Order placed successfully!");
 
@@ -68,8 +79,10 @@ function Payment() {
       // Clear frontend state
       setCartItems([]);
       setTotalAmount(0);
+      setIsPlacing(false);
       navigate("/profile");
     } catch (err) {
+      setIsPlacing(false); // re-enable button so user can retry
       toast.error("Error placing order");
       console.error(err.response?.data?.message || err.message);
     }
@@ -99,11 +112,40 @@ function Payment() {
       <div className="bg-gray-800 p-5 rounded-lg">
         <h3 className="text-xl mb-3 font-semibold">Select Payment Method</h3>
         <button
-          onClick={() => placeOrder(PAYMENT_METHODS.CASH)} // Use PAYMENT_METHODS.CASH for clarity
-          className="bg-orange-500 px-4 py-2 rounded hover:bg-orange-600 mr-4 cursor-pointer"
+          onClick={() => placeOrder(PAYMENT_METHODS.CASH)}
+          disabled={isPlacing}
+          className={`bg-orange-500 px-4 py-2 rounded mr-4 transition ${isPlacing ? "opacity-70 cursor-not-allowed" : "hover:bg-orange-600 cursor-pointer"
+            }`}
+          aria-disabled={isPlacing}
         >
-          Cash on Delivery
+          {isPlacing ? (
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="4"></circle>
+                <path d="M22 12a10 10 0 00-10-10" stroke="white" strokeWidth="4" strokeLinecap="round"></path>
+              </svg>
+              Placing order...
+            </span>
+          ) : (
+            "Cash on Delivery"
+          )}
         </button>
+
+        {/* Small floating preview shown while placing — informs user not to go back */}
+        {isPlacing && (
+          <div className="fixed left-1/2 transform -translate-x-1/2 bottom-24 z-50">
+            <div className="bg-gray-900/90 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 border border-gray-700">
+              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.15)" strokeWidth="4"></circle>
+                <path d="M22 12a10 10 0 00-10-10" stroke="white" strokeWidth="3" strokeLinecap="round"></path>
+              </svg>
+              <div className="text-left text-sm">
+                <div className="font-semibold">Placing order</div>
+                <div className="text-xs text-gray-300">Please don't go back or refresh — processing with server.</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
