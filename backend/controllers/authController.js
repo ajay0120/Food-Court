@@ -33,6 +33,14 @@ const signup = async (req, res) => {
     }
 
     try {
+        //check username uniqueness
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            logger.warn(`Signup attempt with existing username: ${username}`);
+            return res.status(400).json({ message: "Username already taken" });
+        } 
+
+        //check email uniqueness
         const existingUser = await User.findOne({ email });
 
         //  Case 1: User already verified
