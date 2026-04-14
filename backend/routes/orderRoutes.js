@@ -1,8 +1,10 @@
 import express from "express";
-import { placeOrder, getUserOrders, cancelOrder, getAllOrders, getCurrentOrders, getPastOrders, getCancelledOrders, markAsDelivered } from "../controllers/orderController.js";
+import { placeOrder, getUserOrders, cancelOrder } from "../controllers/orderController.js";
 import { protect, isAdmin } from "../middleware/authMiddleware.js";
+import { getAdminOrders, updateAdminOrderStatus } from "../controllers/adminController.js";
 import { createHybridRateLimiter } from "../middleware/rateLimitingMiddleware.js";
 import logger from '../logger.js';
+import { ORDER_STATUSES } from "../../common/orderEnums.js";
 
 const router = express.Router();
 
@@ -71,11 +73,56 @@ const adminOrderLimiter = createHybridRateLimiter({
 router.post("/", ipRateLimiter, protect, orderWriteLimiter, placeOrder);
 router.get("/myorders", ipRateLimiter, protect, orderReadLimiter, getUserOrders);
 router.put("/cancel/:id", ipRateLimiter, protect, orderWriteLimiter, cancelOrder);
-router.get("/all", ipRateLimiter, protect,isAdmin , adminOrderLimiter, getAllOrders);
-router.get("/currentOrders", ipRateLimiter, protect,isAdmin,adminOrderLimiter,getCurrentOrders)
-router.get("/pastOrders", ipRateLimiter, protect,isAdmin,adminOrderLimiter,getPastOrders)
-router.get("/cancelledOrders", ipRateLimiter, protect,isAdmin,adminOrderLimiter,getCancelledOrders)
-router.post("/markAsDelivered", ipRateLimiter, protect,isAdmin,adminOrderLimiter,markAsDelivered)
-router.put("/:id/deliver", ipRateLimiter, protect,isAdmin,adminOrderLimiter,getAllOrders);
+router.get("/all", ipRateLimiter, protect, isAdmin, adminOrderLimiter, getAdminOrders);
+router.get(
+  "/currentOrders",
+  ipRateLimiter,
+  protect,
+  isAdmin,
+  adminOrderLimiter,
+  (req, _res, next) => {
+    req.query.section = "current";
+    next();
+  },
+  getAdminOrders
+);
+router.get(
+  "/pastOrders",
+  ipRateLimiter,
+  protect,
+  isAdmin,
+  adminOrderLimiter,
+  (req, _res, next) => {
+    req.query.section = "past";
+    next();
+  },
+  getAdminOrders
+);
+router.get(
+  "/cancelledOrders",
+  ipRateLimiter,
+  protect,
+  isAdmin,
+  adminOrderLimiter,
+  (req, _res, next) => {
+    req.query.section = "cancelled";
+    next();
+  },
+  getAdminOrders
+);
+router.post(
+  "/markAsDelivered",
+  ipRateLimiter,
+  protect,
+  isAdmin,
+  adminOrderLimiter,
+  (req, _res, next) => {
+    req.params.id = req.body.orderId;
+    req.body.status = req.body.status || ORDER_STATUSES.DELIVERED;
+    next();
+  },
+  updateAdminOrderStatus
+);
+router.put("/:id/deliver", ipRateLimiter, protect, isAdmin, adminOrderLimiter, updateAdminOrderStatus);
 
 export default router;

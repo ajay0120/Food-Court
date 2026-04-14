@@ -21,8 +21,8 @@ const ipRateLimiter = createHybridRateLimiter({
 });
 
 const cartRateLimiter = createHybridRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: 10 * 60 * 1000,
+  max: 50,
   message: { message: "Too many cart requests, please try again later." },
   keyType: "user",
   skip: (req) => req.user?.role === "admin",

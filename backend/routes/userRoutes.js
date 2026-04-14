@@ -1,8 +1,7 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, isAdmin } from "../middleware/authMiddleware.js";
 import { getUserProfile, getUserStats } from "../controllers/userController.js";
-import User from "../models/User.js";
-import Order from "../models/order.js";
+import { getAdminUserDetail, getAdminUsers } from "../controllers/adminController.js";
 import { createHybridRateLimiter } from "../middleware/rateLimitingMiddleware.js";
 import logger from '../logger.js';
 
@@ -45,5 +44,7 @@ router.get("/profile", ipRateLimiter, protect, userRateLimiter, getUserProfile);
 
 // Get user statistics
 router.get("/stats", ipRateLimiter, protect, userRateLimiter, getUserStats);
+router.get("/", ipRateLimiter, protect, isAdmin, userRateLimiter, getAdminUsers);
+router.get("/:id", ipRateLimiter, protect, isAdmin, userRateLimiter, getAdminUserDetail);
 
 export default router;

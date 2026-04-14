@@ -16,6 +16,8 @@ import ForgotPass from "./ForgotPassword/ForgotPass";
 import Payment from "./Payment/Payment";
 import AdminRoute from "./components/AdminRoute";
 import AdminProfile from "./components/AdminProfile";
+import AdminUsers from "./components/AdminUsers";
+import AdminOrders from "./components/AdminOrders";
 import VerifyEmail from "./components/VerifyEmail";
 import TodayOffers from "./components/TodayOffers";
 import ContactUs from "./components/ContactUs";
@@ -66,6 +68,22 @@ function App() {
             element={
               <AdminRoute>
                 <AdminProfile />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsers />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              <AdminRoute>
+                <AdminOrders />
               </AdminRoute>
             }
           />

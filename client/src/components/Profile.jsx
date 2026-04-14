@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Package, LogOut, UserCircle, MapPin, Calendar } from "lucide-react";
+import { User, Package, LogOut, UserCircle, MapPin, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Avatar from "react-avatar";
 import Navbar from "./Navbar"; 
 import PersonalInfo from "./PersonalInfo";
 import PreviousOrders from "./PreviousOrders";
 import axios from '../api/axios'; 
+
+void motion;
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const Profile = () => {
   const [status, setStatus] = useState("loading");
   const [activeSection, setActiveSection] = useState("profile");
   const [activeTab, setActiveTab] = useState("Personal");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Fetch profile data from the API when the component loads
   useEffect(() => {
@@ -42,6 +45,21 @@ const Profile = () => {
     };
 
     fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 24) {
+        setIsSidebarCollapsed(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
 
@@ -152,23 +170,32 @@ const Profile = () => {
       </div>
 
       {/* Sidebar */}
-      <div className="w-60 fixed top-0 left-0 h-screen bg-gray-900/90 backdrop-blur-sm border-r border-gray-700 p-6 flex flex-col justify-between cursor-pointer z-20">
+      <div className={`fixed top-0 left-0 h-screen bg-gray-900/90 backdrop-blur-sm border-r border-gray-700 p-6 flex flex-col justify-between z-20 transition-all duration-300 ${isSidebarCollapsed ? "w-24" : "w-60"}`}>
         <div>
-          <motion.h2 
-            className="text-2xl bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent font-bold mb-6"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            Account
-          </motion.h2>
+          <div className={`mb-6 flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"}`}>
+            <motion.h2 
+              className="text-2xl bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent font-bold"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              {isSidebarCollapsed ? "A" : "Account"}
+            </motion.h2>
+            <button
+              onClick={() => setIsSidebarCollapsed((value) => !value)}
+              className="rounded-xl bg-gray-800/70 hover:bg-gray-700/80 p-2 transition-all duration-300"
+              aria-label={isSidebarCollapsed ? "Expand profile sidebar" : "Collapse profile sidebar"}
+            >
+              {isSidebarCollapsed ? <ChevronRight size={18} className="text-white" /> : <ChevronLeft size={18} className="text-white" />}
+            </button>
+          </div>
           <motion.button
             onClick={() => setActiveSection("profile")}
-            className={`w-full text-left px-4 py-3 rounded-xl mb-3 cursor-pointer transition-all duration-300 flex items-center gap-3 ${
+            className={`w-full text-left px-4 py-3 rounded-xl mb-3 cursor-pointer transition-all duration-300 flex items-center ${
               activeSection === "profile" 
                 ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
                 : "bg-gray-800/50 hover:bg-orange-500/20 hover:border-orange-500/50 border border-gray-700"
-            }`}
+            } ${isSidebarCollapsed ? "justify-center" : "gap-3"}`}
             whileHover={{ scale: 1.02, x: 5 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, x: -20 }}
@@ -176,15 +203,15 @@ const Profile = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <User size={18} />
-            Profile
+            {!isSidebarCollapsed ? "Profile" : null}
           </motion.button>
           <motion.button
             onClick={() => setActiveSection("orders")}
-            className={`w-full text-left px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 flex items-center gap-3 ${
+            className={`w-full text-left px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 flex items-center ${
               activeSection === "orders" 
                 ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
                 : "bg-gray-800/50 hover:bg-orange-500/20 hover:border-orange-500/50 border border-gray-700"
-            }`}
+            } ${isSidebarCollapsed ? "justify-center" : "gap-3"}`}
             whileHover={{ scale: 1.02, x: 5 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, x: -20 }}
@@ -192,12 +219,14 @@ const Profile = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Package size={18} />
-            Previous Orders
+            {!isSidebarCollapsed ? "Previous Orders" : null}
           </motion.button>
         </div>
         <motion.button
           onClick={handleLogout}
-          className="w-full text-left px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-all duration-300 cursor-pointer shadow-lg flex items-center gap-3"
+          className={`w-full text-left px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-all duration-300 cursor-pointer shadow-lg flex items-center ${
+            isSidebarCollapsed ? "justify-center" : "gap-3"
+          }`}
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           initial={{ opacity: 0, x: -20 }}
@@ -205,12 +234,12 @@ const Profile = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <LogOut size={18} />
-          Logout
+          {!isSidebarCollapsed ? "Logout" : null}
         </motion.button>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col ml-60 relative z-10">
+      <div className={`flex-1 flex flex-col relative z-10 transition-all duration-300 ${isSidebarCollapsed ? "ml-24" : "ml-60"}`}>
         <Navbar />
 
         <div className="p-10 flex-1">
