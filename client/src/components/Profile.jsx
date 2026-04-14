@@ -10,8 +10,8 @@ import axios from '../api/axios';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null); // State to hold user data from API
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [user, setUser] = useState(null);
+  const [status, setStatus] = useState("loading");
   const [activeSection, setActiveSection] = useState("profile");
   const [activeTab, setActiveTab] = useState("Personal");
 
@@ -19,16 +19,25 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setStatus("loading");
         const { data } = await axios.get("/users/profile");
         setUser(data);
+        setStatus("success");
       } catch (error) {
         console.error("Failed to fetch profile", error);
-        // Optional: handle error, e.g., redirect to login if unauthorized
+        setUser(null);
+
         if (error.response?.status === 401) {
-          handleLogout();
+          setStatus("unauthorized");
+          return;
         }
-      } finally {
-        setIsLoading(false);
+
+        if (error.response?.status === 429) {
+          setStatus("rate_limited");
+          return;
+        }
+
+        setStatus("error");
       }
     };
 
@@ -45,8 +54,7 @@ const Profile = () => {
     setActiveTab(tab);
   };
 
-  // Render a loading state
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
         <div className="flex items-center justify-center mb-4">
@@ -60,9 +68,43 @@ const Profile = () => {
     );
   }
 
-  // Render if user data failed to load
-  if (!user) {
-    return <div>Could not load profile. Please try logging in again.</div>;
+  if (status === "unauthorized") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 px-6 text-white">
+        <div className="max-w-md w-full rounded-2xl border border-gray-700 bg-gray-900/80 p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-semibold mb-3">Please log in to view your profile</h2>
+          <p className="text-gray-300 mb-6">Your session may have expired. Sign in again to continue.</p>
+          <button
+            onClick={() => navigate("/login")}
+            className="rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-3 font-medium text-white transition hover:from-orange-600 hover:to-orange-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "rate_limited") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 px-6 text-white">
+        <div className="max-w-md w-full rounded-2xl border border-gray-700 bg-gray-900/80 p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-semibold mb-3">Too many requests</h2>
+          <p className="text-gray-300">Please wait a moment and try loading your profile again.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "error" || !user) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 px-6 text-white">
+        <div className="max-w-md w-full rounded-2xl border border-gray-700 bg-gray-900/80 p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-semibold mb-3">Something went wrong</h2>
+          <p className="text-gray-300">We couldn&apos;t load your profile right now. Please try again later.</p>
+        </div>
+      </div>
+    );
   }
 
   const renderSubSection = () => {

@@ -4,6 +4,7 @@ import { getUserProfile, getUserStats } from "../controllers/userController.js";
 import User from "../models/User.js";
 import Order from "../models/order.js";
 import { createHybridRateLimiter } from "../middleware/rateLimitingMiddleware.js";
+import logger from '../logger.js';
 
 const router = express.Router();
 
@@ -11,12 +12,33 @@ const ipRateLimiter = createHybridRateLimiter({
   windowMs: 60 * 1000,
   max: 100, // limit each IP to 100 requests/min before auth
   message: { message: "Too many user requests, please try again later." },
+  keyType: "ip", // only use IP for unauthenticated routes
+  onLimitReached: (req) => {
+    logger.warn("Rate limit exceeded", {
+      ip: req.ip,
+      route: req.originalUrl,
+      method: req.method,
+    });
+  },
 });
 
 const userRateLimiter = createHybridRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each user to 100 requests per windowMs
   message: { message: "Too many user requests, please try again later." },
+  keyType: "user",
+  skip: (req) => req.user?.role === "admin",
+
+  onLimitReached: (req) => {
+    logger.warn("User route rate limit exceeded", {
+      userId: req.user?._id?.toString(),
+      role: req.user?.role,
+      ip: req.ip,
+      route: req.originalUrl,
+      method: req.method,
+      userAgent: req.headers["user-agent"],
+    });
+  },
 });
 
 router.get("/profile", ipRateLimiter, protect, userRateLimiter, getUserProfile);
