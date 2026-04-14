@@ -3,7 +3,7 @@ import Food from "../models/Food.js";
 import logger from '../logger.js';
 import { validateObjectId, validatePositiveInt, buildValidationError } from '../utils/validation.js';
 import { USER_ROLES } from "../../common/userEnums.js";
-import { ORDER_STATUSES } from "../../common/orderEnums.js";
+import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from "../../common/orderEnums.js";
 logger.info("orderController loaded");
 
 // Helper to extract & sanitize pagination params
@@ -57,6 +57,9 @@ const placeOrder = async (req, res) => {
       items,
       total,
       paymentMethod,
+      paymentStatus: paymentMethod === PAYMENT_METHODS.CASH
+        ? PAYMENT_STATUSES.UNPAID
+        : PAYMENT_STATUSES.PAID,
       status: ORDER_STATUSES.PLACED,
     });
     // Batch fetch & validate items (avoid N+1 queries)
@@ -274,7 +277,7 @@ const markAsDelivered = async (req, res) => {
     );
     logger.info(`Order ${orderId} marked as delivered by user ${req.user.id}`);
     return res.status(200).json({ message: "Order marked as delivered" });
-  } catch {
+  } catch (err) {
     logger.error("Error in marking order as delivered: " + err.message);
     res.status(500).json({ message: "Error in marking" });
   }

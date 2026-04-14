@@ -1,445 +1,137 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { User, Package, LogOut, UserCircle, MapPin, Calendar, Clock, CheckCircle, XCircle, Settings } from "lucide-react";
-import Navbar from "./Navbar";
+import React, { useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2, Package, Shield, Users } from "lucide-react";
 import Avatar from "react-avatar";
 import axios from "../api/axios";
-import PersonalInfo from "./PersonalInfo";
-import CurrentOrders from "./CurrentOrders";
-import PastOrders from "./PastOrders";
-import CancelledOrders from "./CancelledOrder";
+import AdminShell from "./AdminShell";
 
-const AdminProfile = () => {
-  const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("profile");
-  const [activeTab, setActiveTab] = useState("Personal");
-  const [currentOrders, setCurrentOrders] = useState([]);
-  const [pastOrders, setPastOrders] = useState([]);
-  const [cancelledOrders, setCancelledOrders] = useState([]);
-  // pagination states
-  const [currentPageCurrent, setCurrentPageCurrent] = useState(1);
-  const [currentPagePast, setCurrentPagePast] = useState(1);
-  const [currentPageCancelled, setCurrentPageCancelled] = useState(1);
-  const pageLimit = 10;
-  const [metaCurrent, setMetaCurrent] = useState(null);
-  const [metaPast, setMetaPast] = useState(null);
-  const [metaCancelled, setMetaCancelled] = useState(null);
+const statCards = [
+  { key: "users", label: "Users", icon: Users, color: "text-blue-300", bg: "from-blue-500/20 to-blue-700/10" },
+  { key: "currentOrders", label: "Current Orders", icon: Package, color: "text-orange-300", bg: "from-orange-500/20 to-red-500/10" },
+  { key: "deliveredOrders", label: "Past Orders", icon: CheckCircle2, color: "text-green-300", bg: "from-green-500/20 to-emerald-700/10" },
+  { key: "cancelledOrders", label: "Cancelled Orders", icon: AlertCircle, color: "text-red-300", bg: "from-red-500/20 to-red-700/10" },
+];
 
-  const token = localStorage.getItem("token");
-
-  const fetchCurrentOrders = async (page = 1) => {
-    try {
-      const res = await axios.get(`/orders/currentOrders`, { params: { page, limit: pageLimit } });
-      setCurrentOrders(res.data.orders || []);
-      setMetaCurrent(res.data.pagination || null);
-    } catch (error) {
-      console.error("Error fetching current orders", error);
-    }
-  };
-
-  const fetchPastOrders = async (page = 1) => {
-    try {
-      const res = await axios.get(`/orders/pastOrders`, { params: { page, limit: pageLimit } });
-      setPastOrders(res.data.orders || []);
-      setMetaPast(res.data.pagination || null);
-    } catch (error) {
-      console.error("Error fetching past orders", error);
-    }
-  };
-
-  const fetchCancelledOrders = async (page = 1) => {
-    try {
-      const res = await axios.get(`/orders/cancelledOrders`, { params: { page, limit: pageLimit } });
-      setCancelledOrders(res.data.orders || []);
-      setMetaCancelled(res.data.pagination || null);
-    } catch (error) {
-      console.error("Error fetching cancelled orders", error);
-    }
-  };
+function AdminProfile() {
+  const [profile, setProfile] = useState(null);
+  const [stats, setStats] = useState({
+    users: 0,
+    currentOrders: 0,
+    deliveredOrders: 0,
+    cancelledOrders: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
-    fetchCurrentOrders(currentPageCurrent);
-  }, [currentPageCurrent]);
-  useEffect(() => {
-    fetchPastOrders(currentPagePast);
-  }, [currentPagePast]);
-  useEffect(() => {
-    fetchCancelledOrders(currentPageCancelled);
-  }, [currentPageCancelled]);
+    let isMounted = true;
 
-  const markAsDelivered = async (orderId) => {
-    try {
-      await axios.post(
-        `/orders/markAsDelivered`,
-        { orderId }
-      );
-      await fetchCurrentOrders();
-      await fetchPastOrders();
-    } catch (error) {
-      console.error("Error marking as delivered", error);
-    }
-  };
+    const loadDashboard = async () => {
+      try {
+        setLoadFailed(false);
+        const [profileRes, usersRes, currentRes, pastRes, cancelledRes] = await Promise.all([
+          axios.get("/users/profile"),
+          axios.get("/users", { params: { page: 1, limit: 1 } }),
+          axios.get("/orders/currentOrders", { params: { page: 1, limit: 1 } }),
+          axios.get("/orders/pastOrders", { params: { page: 1, limit: 1 } }),
+          axios.get("/orders/cancelledOrders", { params: { page: 1, limit: 1 } }),
+        ]);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
+        if (!isMounted) {
+          return;
+        }
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-  };
+        setProfile(profileRes.data);
+        setStats({
+          users: usersRes.data.pagination?.totalItems || 0,
+          currentOrders: currentRes.data.pagination?.totalItems || 0,
+          deliveredOrders: pastRes.data.pagination?.totalItems || 0,
+          cancelledOrders: cancelledRes.data.pagination?.totalItems || 0,
+        });
+      } catch (error) {
+        if (isMounted) {
+          console.error("Failed to load admin profile", error);
+          setLoadFailed(true);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const renderSubSection = () => {
-    switch (activeTab) {
-      case "Current Orders":
-        return (
-          <div className="space-y-6">
-            {currentOrders.length === 0 ? (
-              <motion.div 
-                className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md mx-auto text-center border border-gray-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Clock size={48} className="mx-auto mb-4 text-orange-400" />
-                <h3 className="text-lg text-gray-300 mb-2">No Current Orders</h3>
-                <p className="text-sm text-gray-400">New orders will appear here when customers place them</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {currentOrders.map((order, index) => (
-                  <motion.div
-                    key={order._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                  >
-                    <CurrentOrders
-                      order={order}
-                      index={index}
-                      markAsDelivered={markAsDelivered}
-                    />
-                  </motion.div>
-                ))}
-                {metaCurrent && (
-                  <div className="flex justify-center items-center gap-4 mt-6">
-                    <button disabled={!metaCurrent.hasPrev} onClick={() => setCurrentPageCurrent(p => Math.max(1, p - 1))} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCurrent.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
-                    <span className="text-sm text-gray-300">Page {metaCurrent.page} of {metaCurrent.totalPages}</span>
-                    <button disabled={!metaCurrent.hasNext} onClick={() => setCurrentPageCurrent(p => p + 1)} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCurrent.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </div>
-        );
-      case "Past Orders":
-        return (
-          <div className="space-y-6">
-            {pastOrders.length === 0 ? (
-              <motion.div 
-                className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md mx-auto text-center border border-gray-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <CheckCircle size={48} className="mx-auto mb-4 text-green-400" />
-                <h3 className="text-lg text-gray-300 mb-2">No Past Orders</h3>
-                <p className="text-sm text-gray-400">Delivered orders will appear here</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {pastOrders.map((order, index) => (
-                  <motion.div
-                    key={order._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                  >
-                    <PastOrders order={order} index={index} />
-                  </motion.div>
-                ))}
-                {metaPast && (
-                  <div className="flex justify-center items-center gap-4 mt-6">
-                    <button disabled={!metaPast.hasPrev} onClick={() => setCurrentPagePast(p => Math.max(1, p - 1))} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaPast.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
-                    <span className="text-sm text-gray-300">Page {metaPast.page} of {metaPast.totalPages}</span>
-                    <button disabled={!metaPast.hasNext} onClick={() => setCurrentPagePast(p => p + 1)} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaPast.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </div>
-        );
-      case "Cancelled Orders":
-        return (
-          <div className="space-y-6">
-            {cancelledOrders.length === 0 ? (
-              <motion.div 
-                className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md mx-auto text-center border border-gray-700"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <XCircle size={48} className="mx-auto mb-4 text-red-400" />
-                <h3 className="text-lg text-gray-300 mb-2">No Cancelled Orders</h3>
-                <p className="text-sm text-gray-400">Cancelled orders will appear here</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {cancelledOrders.map((order, index) => (
-                  <motion.div
-                    key={order._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                  >
-                    <CancelledOrders order={order} index={index} />
-                  </motion.div>
-                ))}
-                {metaCancelled && (
-                  <div className="flex justify-center items-center gap-4 mt-6">
-                    <button disabled={!metaCancelled.hasPrev} onClick={() => setCurrentPageCancelled(p => Math.max(1, p - 1))} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCancelled.hasPrev ? 'hover:bg-gray-600' : ''}`}>Prev</button>
-                    <span className="text-sm text-gray-300">Page {metaCancelled.page} of {metaCancelled.totalPages}</span>
-                    <button disabled={!metaCancelled.hasNext} onClick={() => setCurrentPageCancelled(p => p + 1)} className={`px-4 py-2 rounded-lg bg-gray-700 disabled:opacity-40 ${metaCancelled.hasNext ? 'hover:bg-gray-600' : ''}`}>Next</button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </div>
-        );
-      case "Personal":
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <PersonalInfo />
-          </motion.div>
-        );
-      case "Address":
-        return (
-          <motion.div 
-            className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md mx-auto text-center border border-gray-700"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <MapPin size={48} className="mx-auto mb-4 text-blue-400" />
-            <h3 className="text-lg text-gray-300 mb-2">No Address Added</h3>
-            <p className="text-sm text-gray-400">Add your delivery address to get started with orders</p>
-          </motion.div>
-        );
-      case "SubscriptionInfo":
-        return (
-          <motion.div 
-            className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md mx-auto text-center border border-gray-700"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Calendar size={48} className="mx-auto mb-4 text-purple-400" />
-            <h3 className="text-lg text-gray-300 mb-2">No Subscriptions</h3>
-            <p className="text-sm text-gray-400">Subscribe to meal plans for better deals and convenience</p>
-          </motion.div>
-        );
-      default:
-        return null;
-    }
-  };
+    loadDashboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex">
-      {/* Sidebar */}
-      <motion.div 
-        className="w-64 fixed top-0 left-0 h-screen bg-gradient-to-b from-gray-900/95 via-gray-800/90 to-gray-900/95 backdrop-blur-xl border-r border-gray-700/50 p-6 flex flex-col justify-between shadow-2xl"
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div>
-          <motion.h2 
-            className="text-2xl font-bold mb-8 bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            Admin Dashboard
-          </motion.h2>
-          
-          <div className="space-y-3">
-            <motion.button
-              onClick={() => {
-                setActiveSection("profile");
-                setActiveTab("Personal");
-              }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeSection === "profile" 
-                  ? "bg-gradient-to-r from-orange-500/90 to-red-500/90 text-white shadow-lg transform scale-105" 
-                  : "bg-gray-800/50 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-red-500/20 hover:shadow-md"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <User size={20} />
-              <span className="font-medium">Profile</span>
-            </motion.button>
-            
-            <motion.button
-              onClick={() => {
-                setActiveSection("orders");
-                setActiveTab("Current Orders");
-              }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeSection === "orders" 
-                  ? "bg-gradient-to-r from-orange-500/90 to-red-500/90 text-white shadow-lg transform scale-105" 
-                  : "bg-gray-800/50 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-red-500/20 hover:shadow-md"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Package size={20} />
-              <span className="font-medium">Orders</span>
-            </motion.button>
+    <AdminShell
+      title="Admin Profile"
+      subtitle="Profile data and order summaries load once when this page opens. If loading fails, the page stops instead of retrying in a loop."
+    >
+      {loadFailed ? (
+        <div className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-2xl mx-auto text-center border border-red-700">
+          <AlertCircle size={46} className="mx-auto mb-4 text-red-400" />
+          <h3 className="text-xl font-semibold text-white">Could not load admin profile</h3>
+          <p className="mt-2 text-sm text-gray-300">
+            Fetching was aborted after the first failure to avoid repeated requests and rate-limit issues.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <div className="bg-gradient-to-r from-gray-800/80 via-gray-700/70 to-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-600/30">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <Avatar
+                color={Avatar.getRandomColor("sitebase", ["blue"])}
+                name={profile?.username || "Admin"}
+                size="90"
+                round
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="rounded-full bg-orange-500/15 px-4 py-1 text-sm text-orange-300 font-semibold">
+                    Admin Access
+                  </div>
+                </div>
+                <h3 className="text-3xl font-bold text-white">
+                  {loading ? "Loading..." : profile?.name || "Admin"}
+                </h3>
+                <p className="mt-2 text-gray-300">
+                  @{profile?.username || "admin"} | {profile?.email || "Fetching profile"}
+                </p>
+                <p className="mt-1 text-sm text-gray-400">
+                  Role: {profile?.role || "admin"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {statCards.map((card) => (
+              <div
+                key={card.key}
+                className={`bg-gradient-to-br ${card.bg} border border-gray-700 rounded-2xl p-6 shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-300">{card.label}</p>
+                    <p className="mt-3 text-3xl font-bold text-white">
+                      {loading ? "..." : stats[card.key]}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-gray-900/50 p-3">
+                    <card.icon className={`h-5 w-5 ${card.color}`} />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        
-        <motion.button
-          onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-red-600/90 to-red-700/90 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <LogOut size={20} />
-          <span className="font-medium">Logout</span>
-        </motion.button>
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col ml-64">
-        <Navbar />
-        <div className="p-8 flex-1">
-          {activeSection === "profile" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                Your Profile
-              </h2>
-              
-              <div className="flex justify-center mb-8">
-                <motion.div 
-                  className="bg-gradient-to-r from-gray-800/80 via-gray-700/80 to-gray-800/80 backdrop-blur-sm rounded-2xl p-2 shadow-xl border border-gray-600/30"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="flex space-x-2">
-                    {[
-                      { key: "Personal", icon: UserCircle, label: "Personal" },
-                      { key: "Address", icon: MapPin, label: "Address" },
-                      { key: "SubscriptionInfo", icon: Calendar, label: "Subscriptions" }
-                    ].map(({ key, icon: Icon, label }) => (
-                      <motion.button
-                        key={key}
-                        className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-medium ${
-                          activeTab === key
-                            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
-                            : "text-gray-300 hover:text-white hover:bg-gray-700/50"
-                        }`}
-                        onClick={() => handleTabClick(key)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Icon size={18} />
-                        <span>{label}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
-              
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {renderSubSection()}
-              </motion.div>
-            </motion.div>
-          )}
-
-          {activeSection === "orders" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                Your Orders
-              </h2>
-              
-              <div className="flex justify-center mb-8">
-                <motion.div 
-                  className="bg-gradient-to-r from-gray-800/80 via-gray-700/80 to-gray-800/80 backdrop-blur-sm rounded-2xl p-2 shadow-xl border border-gray-600/30"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="flex space-x-2">
-                    {[
-                      { key: "Current Orders", icon: Clock, label: "Current" },
-                      { key: "Past Orders", icon: CheckCircle, label: "Past" },
-                      { key: "Cancelled Orders", icon: XCircle, label: "Cancelled" }
-                    ].map(({ key, icon: Icon, label }) => (
-                      <motion.button
-                        key={key}
-                        className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-medium ${
-                          activeTab === key
-                            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
-                            : "text-gray-300 hover:text-white hover:bg-gray-700/50"
-                        }`}
-                        onClick={() => handleTabClick(key)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Icon size={18} />
-                        <span>{label}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
-              
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {renderSubSection()}
-              </motion.div>
-            </motion.div>
-          )}
-        </div>
-      </div>
-    </div>
+      )}
+    </AdminShell>
   );
-};
+}
 
 export default AdminProfile;

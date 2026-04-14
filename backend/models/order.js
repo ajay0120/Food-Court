@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ORDER_STATUSES, PAYMENT_METHODS } from "../../common/orderEnums.js";
+import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from "../../common/orderEnums.js";
 
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -14,6 +14,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: Object.values(PAYMENT_METHODS),
     required: true,
+  },
+  paymentStatus: {
+    type: String,
+    enum: Object.values(PAYMENT_STATUSES),
+    default: PAYMENT_STATUSES.UNPAID,
   },
   status: {
     type: String,

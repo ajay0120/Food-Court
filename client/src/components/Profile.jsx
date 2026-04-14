@@ -1,38 +1,65 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Package, LogOut, UserCircle, MapPin, Calendar } from "lucide-react";
+import { User, Package, LogOut, UserCircle, MapPin, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Avatar from "react-avatar";
 import Navbar from "./Navbar"; 
 import PersonalInfo from "./PersonalInfo";
 import PreviousOrders from "./PreviousOrders";
 import axios from '../api/axios'; 
 
+void motion;
+
 const Profile = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null); // State to hold user data from API
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [user, setUser] = useState(null);
+  const [status, setStatus] = useState("loading");
   const [activeSection, setActiveSection] = useState("profile");
   const [activeTab, setActiveTab] = useState("Personal");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Fetch profile data from the API when the component loads
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setStatus("loading");
         const { data } = await axios.get("/users/profile");
         setUser(data);
+        setStatus("success");
       } catch (error) {
         console.error("Failed to fetch profile", error);
-        // Optional: handle error, e.g., redirect to login if unauthorized
+        setUser(null);
+
         if (error.response?.status === 401) {
-          handleLogout();
+          setStatus("unauthorized");
+          return;
         }
-      } finally {
-        setIsLoading(false);
+
+        if (error.response?.status === 429) {
+          setStatus("rate_limited");
+          return;
+        }
+
+        setStatus("error");
       }
     };
 
     fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 24) {
+        setIsSidebarCollapsed(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
 
@@ -45,8 +72,7 @@ const Profile = () => {
     setActiveTab(tab);
   };
 
-  // Render a loading state
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
         <div className="flex items-center justify-center mb-4">
@@ -60,9 +86,43 @@ const Profile = () => {
     );
   }
 
-  // Render if user data failed to load
-  if (!user) {
-    return <div>Could not load profile. Please try logging in again.</div>;
+  if (status === "unauthorized") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 px-6 text-white">
+        <div className="max-w-md w-full rounded-2xl border border-gray-700 bg-gray-900/80 p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-semibold mb-3">Please log in to view your profile</h2>
+          <p className="text-gray-300 mb-6">Your session may have expired. Sign in again to continue.</p>
+          <button
+            onClick={() => navigate("/login")}
+            className="rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-3 font-medium text-white transition hover:from-orange-600 hover:to-orange-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "rate_limited") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 px-6 text-white">
+        <div className="max-w-md w-full rounded-2xl border border-gray-700 bg-gray-900/80 p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-semibold mb-3">Too many requests</h2>
+          <p className="text-gray-300">Please wait a moment and try loading your profile again.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "error" || !user) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 px-6 text-white">
+        <div className="max-w-md w-full rounded-2xl border border-gray-700 bg-gray-900/80 p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-semibold mb-3">Something went wrong</h2>
+          <p className="text-gray-300">We couldn&apos;t load your profile right now. Please try again later.</p>
+        </div>
+      </div>
+    );
   }
 
   const renderSubSection = () => {
@@ -110,23 +170,32 @@ const Profile = () => {
       </div>
 
       {/* Sidebar */}
-      <div className="w-60 fixed top-0 left-0 h-screen bg-gray-900/90 backdrop-blur-sm border-r border-gray-700 p-6 flex flex-col justify-between cursor-pointer z-20">
+      <div className={`fixed top-0 left-0 h-screen bg-gray-900/90 backdrop-blur-sm border-r border-gray-700 p-6 flex flex-col justify-between z-20 transition-all duration-300 ${isSidebarCollapsed ? "w-24" : "w-60"}`}>
         <div>
-          <motion.h2 
-            className="text-2xl bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent font-bold mb-6"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            Account
-          </motion.h2>
+          <div className={`mb-6 flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"}`}>
+            <motion.h2 
+              className="text-2xl bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent font-bold"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              {isSidebarCollapsed ? "A" : "Account"}
+            </motion.h2>
+            <button
+              onClick={() => setIsSidebarCollapsed((value) => !value)}
+              className="rounded-xl bg-gray-800/70 hover:bg-gray-700/80 p-2 transition-all duration-300"
+              aria-label={isSidebarCollapsed ? "Expand profile sidebar" : "Collapse profile sidebar"}
+            >
+              {isSidebarCollapsed ? <ChevronRight size={18} className="text-white" /> : <ChevronLeft size={18} className="text-white" />}
+            </button>
+          </div>
           <motion.button
             onClick={() => setActiveSection("profile")}
-            className={`w-full text-left px-4 py-3 rounded-xl mb-3 cursor-pointer transition-all duration-300 flex items-center gap-3 ${
+            className={`w-full text-left px-4 py-3 rounded-xl mb-3 cursor-pointer transition-all duration-300 flex items-center ${
               activeSection === "profile" 
                 ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
                 : "bg-gray-800/50 hover:bg-orange-500/20 hover:border-orange-500/50 border border-gray-700"
-            }`}
+            } ${isSidebarCollapsed ? "justify-center" : "gap-3"}`}
             whileHover={{ scale: 1.02, x: 5 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, x: -20 }}
@@ -134,15 +203,15 @@ const Profile = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <User size={18} />
-            Profile
+            {!isSidebarCollapsed ? "Profile" : null}
           </motion.button>
           <motion.button
             onClick={() => setActiveSection("orders")}
-            className={`w-full text-left px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 flex items-center gap-3 ${
+            className={`w-full text-left px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 flex items-center ${
               activeSection === "orders" 
                 ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
                 : "bg-gray-800/50 hover:bg-orange-500/20 hover:border-orange-500/50 border border-gray-700"
-            }`}
+            } ${isSidebarCollapsed ? "justify-center" : "gap-3"}`}
             whileHover={{ scale: 1.02, x: 5 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, x: -20 }}
@@ -150,12 +219,14 @@ const Profile = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Package size={18} />
-            Previous Orders
+            {!isSidebarCollapsed ? "Previous Orders" : null}
           </motion.button>
         </div>
         <motion.button
           onClick={handleLogout}
-          className="w-full text-left px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-all duration-300 cursor-pointer shadow-lg flex items-center gap-3"
+          className={`w-full text-left px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-all duration-300 cursor-pointer shadow-lg flex items-center ${
+            isSidebarCollapsed ? "justify-center" : "gap-3"
+          }`}
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           initial={{ opacity: 0, x: -20 }}
@@ -163,12 +234,12 @@ const Profile = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <LogOut size={18} />
-          Logout
+          {!isSidebarCollapsed ? "Logout" : null}
         </motion.button>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col ml-60 relative z-10">
+      <div className={`flex-1 flex flex-col relative z-10 transition-all duration-300 ${isSidebarCollapsed ? "ml-24" : "ml-60"}`}>
         <Navbar />
 
         <div className="p-10 flex-1">
