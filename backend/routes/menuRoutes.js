@@ -21,7 +21,7 @@ const ipRateLimiter = createHybridRateLimiter({
 });
 
 // Public route to view menu
-router.get("/" , getMenu);
+router.get("/" ,ipRateLimiter, getMenu);
 
 // Admin-only routes
 router.get("/deleted", ipRateLimiter, protect, isAdmin, getDeletedMenuItems);
