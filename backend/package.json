@@ -15,7 +15,7 @@
     "google-auth-library": "^10.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.17.0",
-    "mongoose": "^8.13.0",
+    "mongoose": "^8.22.1",
     "nodemailer": "^8.0.5",
     "validator": "^13.15.22",
     "winston": "^3.17.0",
